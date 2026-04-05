@@ -49,5 +49,14 @@
     {"name": "Marie", "mode": "deep_dive_induction"}
   ],
   "oush_sealed": false,
-  "sue_score_last": null
+  "sue_score_last": null,
+  "brewworx": {
+    "pillar": "X",
+    "deity": "Ninkasi",
+    "phi_alc_last": null,
+    "sovereign_tonic_active": false,
+    "e_ash_reserve_kg": 0.0,
+    "enzyme_mesh": {},
+    "absenteeism_index": 1.0
+  }
 }

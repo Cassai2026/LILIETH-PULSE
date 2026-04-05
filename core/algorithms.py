@@ -1,11 +1,12 @@
 """
 LILIETH Kernel — Core Algorithms
 =================================
-Three foundational algorithms that power the Sovereign OS:
+Four foundational algorithms that power the Sovereign OS:
 
   1. S.U.E. (Sovereign Unified Equation) Validator — ethical gate for .ai commands
   2. Indra-Vajra Kinetic Harvester           — converts physical motion to Sovereign Joules
   3. OUSH Handshake                          — P2P finality / block-lock signature check
+  4. Φ_alc (Alchemical Equation)             — Bio-Chemical ROI for the Ninkasi BrewWorX Pillar
 """
 
 from __future__ import annotations
@@ -114,3 +115,62 @@ def oush_handshake(node_id: str, pulse_signature: str) -> bool:
         return True
     print(f"NODE {node_id}: HANDSHAKE FAILED. SIGNATURE INVALID.")
     return False
+
+
+# ---------------------------------------------------------------------------
+# 4.  Φ_alc  (Alchemical Equation — Section X: Ninkasi BrewWorX Pillar)
+# ---------------------------------------------------------------------------
+
+def calculate_phi_alc(
+    chemical_rinse: float,
+    delta_rot: float,
+    e_ash: float,
+    enzymes: Dict[str, float],
+) -> float:
+    """Calculate the Alchemical Bio-Chemical ROI (Φ_alc) for the Ninkasi BrewWorX Pillar.
+
+    Formula
+    -------
+    ``Φ_alc = (Chemical_Rinse + δ_rot) / (E_ash · ΣEnzymes)``
+
+    where:
+
+    * ``Chemical_Rinse`` — removal potency of old-world pesticides and synthetic
+      "Static" fertilizers (range [0.0, 1.0]).
+    * ``δ_rot``          — conversion coefficient of organic waste back into
+      Life-Force (range [0.0, 1.0]).
+    * ``E_ash``          — mineral concentrate harvested from the Section IV
+      Vulcan Kilns (kg, ≥ 0).
+    * ``ΣEnzymes``       — sum of biological "Spark" potencies produced when the
+      Stretford Meadows flora is fermented with Sovereign H₂O.
+
+    Parameters
+    ----------
+    chemical_rinse:
+        Purification coefficient for removing Static pesticide residue.
+    delta_rot:
+        Organic-waste Life-Force conversion coefficient.
+    e_ash:
+        Mineral-concentrate mass from the Vulcan Kilns.
+    enzymes:
+        Dictionary mapping enzyme names to their potency scores (each in [0.0, 1.0]).
+
+    Returns
+    -------
+    float
+        Φ_alc index.  Higher values indicate richer Animus Fuel synthesis.
+        A value **> 1.0** signals that the BrewWorX tonic exceeds the baseline
+        Sovereign threshold.  Returns 0.0 when both inputs are zero.
+
+    Notes
+    -----
+    The tiny constant ``0.0001`` prevents division-by-zero when ``e_ash`` or all
+    enzyme potencies are 0.
+    """
+    _STATIC_GUARD = 0.0001  # prevents division-by-zero
+
+    numerator = chemical_rinse + delta_rot
+    enzyme_sum = sum(enzymes.values())
+    denominator = (e_ash * enzyme_sum) + _STATIC_GUARD
+
+    return numerator / denominator

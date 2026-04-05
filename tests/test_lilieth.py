@@ -15,7 +15,7 @@ import pytest
 # Ensure the repo root is on sys.path so that `core` and `biometrics` resolve.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from core.algorithms import calculate_sue_score, harvest_kinetic_energy, oush_handshake
+from core.algorithms import calculate_sue_score, harvest_kinetic_energy, oush_handshake, calculate_phi_alc
 from core.interpreter import (
     ASTNode,
     AnimusInterpreter,
@@ -86,6 +86,52 @@ class TestOushHandshake:
         assert oush_handshake("NODE_2", "WRONG") is False
         captured = capsys.readouterr()
         assert "FAILED" in captured.out
+
+
+class TestCalculatePhiAlc:
+    def test_standard_synthesis_returns_positive(self):
+        enzymes = {"protease": 0.8, "amylase": 0.7, "lipase": 0.6}
+        result = calculate_phi_alc(
+            chemical_rinse=0.9,
+            delta_rot=0.85,
+            e_ash=1.5,
+            enzymes=enzymes,
+        )
+        assert result > 0.0
+
+    def test_formula_correctness(self):
+        # Φ_alc = (0.9 + 0.85) / (1.5 * (0.8 + 0.7 + 0.6) + 0.0001)
+        #       = 1.75 / (1.5 * 2.1 + 0.0001)
+        #       = 1.75 / 3.1501
+        enzymes = {"protease": 0.8, "amylase": 0.7, "lipase": 0.6}
+        expected = 1.75 / (1.5 * 2.1 + 0.0001)
+        result = calculate_phi_alc(0.9, 0.85, 1.5, enzymes)
+        assert result == pytest.approx(expected)
+
+    def test_zero_e_ash_does_not_raise(self):
+        enzymes = {"lactase": 0.5}
+        result = calculate_phi_alc(
+            chemical_rinse=0.5,
+            delta_rot=0.5,
+            e_ash=0.0,
+            enzymes=enzymes,
+        )
+        assert result > 0.0  # guarded by 0.0001
+
+    def test_empty_enzymes_does_not_raise(self):
+        result = calculate_phi_alc(
+            chemical_rinse=0.8,
+            delta_rot=0.6,
+            e_ash=2.0,
+            enzymes={},
+        )
+        assert result > 0.0  # guarded by 0.0001
+
+    def test_high_e_ash_and_enzymes_lowers_phi(self):
+        enzymes = {"e1": 1.0, "e2": 1.0, "e3": 1.0}
+        low = calculate_phi_alc(0.5, 0.5, 10.0, enzymes)
+        high = calculate_phi_alc(0.5, 0.5, 0.1, enzymes)
+        assert low < high
 
 
 # ===========================================================================
@@ -180,7 +226,7 @@ class TestLiliethParser:
 
     def test_parse_protocol_files(self):
         base = os.path.join(os.path.dirname(__file__), "..", "protocols")
-        for fname in ("init_mesh.v", "stretford_audit.4d", "lilieth_core.ai"):
+        for fname in ("init_mesh.v", "stretford_audit.4d", "lilieth_core.ai", "brewworx.4d"):
             nodes = self.parser.parse_file(os.path.join(base, fname))
             assert len(nodes) > 0
 
@@ -233,6 +279,18 @@ class TestLiliethCompiler:
         base = os.path.join(os.path.dirname(__file__), "..", "protocols")
         bc = self.compiler.compile_file(os.path.join(base, "lilieth_core.ai"))
         assert bc.oush_sealed is True
+
+    def test_compile_brewworx_protocol(self):
+        """Compile the BrewWorX synthesis protocol end-to-end."""
+        base = os.path.join(os.path.dirname(__file__), "..", "protocols")
+        bc = self.compiler.compile_file(
+            os.path.join(base, "brewworx.4d"), node_id="brewworx_ninkasi_node"
+        )
+        assert bc.oush_sealed is True
+        assert bc.source_ext == ".4d"
+        opcodes = [i.opcode for i in bc.instructions]
+        assert "ETERNIUS_BREW" in opcodes
+        assert "ETERNIUS_LOCK" in opcodes
 
 
 # ===========================================================================

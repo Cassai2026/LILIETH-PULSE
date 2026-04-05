@@ -1,0 +1,17 @@
+# brewworx.4d — Eternius Synthesis Blueprint
+# Syntax: <action><scale> [args]
+# Pillar X — Ninkasi (BrewWorX Alchemical Synthesis)
+#
+# Phase 1: Sovereign H2O Purification
+rinse10001 sovereign_h2o_channel
+filter20002 static_pesticide_removal
+# Phase 2: Vulcan Ash Mineral Extraction
+extract30003 e_ash_mineral_concentrate
+# Phase 3: Enzyme Fermentation Spark (Ninkasi Protocol)
+ferment40004 meadows_flora_probiotic
+brew50005 ninkasi_enzyme_mesh
+# Phase 4: Alchemical Tonic Synthesis
+synth60006 sovereign_tonic_careworkx
+distil70007 essential_oils_100_ash_trees
+# Phase 5: Seal the BrewWorX block
+lock80008 brewworx_ninkasi_node

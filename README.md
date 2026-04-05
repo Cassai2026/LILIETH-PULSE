@@ -22,6 +22,7 @@ root lock.
   init_mesh.v        # Vajra — Quad-Vector mesh initialisation
   stretford_audit.4d # Eternius — A56 kinetic-slab spatial audit
   lilieth_core.ai    # Animus — 14+1 Sovereign Pillars governance
+  brewworx.4d        # Eternius — Section X Ninkasi BrewWorX synthesis protocol
 
 /data
   memory_map.json    # Saline Lattice — runtime state of the Sovereign Mesh
@@ -87,6 +88,24 @@ oush_handshake("NODE_42", "ARCHITECT_ALPHA")
 ```
 
 Every compiled bytecode block is sealed with an OUSH handshake before dispatch.
+
+### 4 · Φ_alc — Alchemical Bio-Chemical ROI (Section X: Ninkasi BrewWorX)
+
+```python
+from core.algorithms import calculate_phi_alc
+
+enzymes = {'protease': 0.8, 'amylase': 0.7, 'lipase': 0.6}
+phi = calculate_phi_alc(
+    chemical_rinse=0.9,   # Static-pesticide removal potency
+    delta_rot=0.85,       # Organic-waste Life-Force conversion coefficient
+    e_ash=1.5,            # Vulcan Kiln mineral concentrate (kg)
+    enzymes=enzymes,      # Fermentation "Sparks" from Stretford Meadows flora
+)
+# phi > 1.0 → Sovereign tonic threshold exceeded
+```
+
+The BrewWorX synthesis protocol (`protocols/brewworx.4d`) triggers this equation to
+compute the nutrient mesh ROI of the Ninkasi Pillar.
 
 ---
 
