@@ -120,6 +120,25 @@ with RootSession("ARCHITECT_ALPHA", "LILIETH_BIO_ROOT_v1", node_id="admin") as s
 
 ---
 
+## ENKI FLOW: The Reclamation (Game)
+
+A pygame-based sovereign energy-harvesting game.
+
+```
+/games
+  enki_flow.py   # ENKI FLOW: THE RECLAMATION — dodge Static Sloths, harvest Kinetic Nodes
+```
+
+**Controls:** Arrow keys to navigate the Sovereign Pilot.  
+**Goal:** Harvest 47,000 units of Sovereign Equity without losing all vitality to Static Sloths.
+
+```bash
+pip install pygame
+python games/enki_flow.py
+```
+
+---
+
 ## Running Tests
 
 ```bash
