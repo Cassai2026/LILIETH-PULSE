@@ -22,6 +22,7 @@ root lock.
   init_mesh.v        # Vajra — Quad-Vector mesh initialisation
   stretford_audit.4d # Eternius — A56 kinetic-slab spatial audit
   lilieth_core.ai    # Animus — 14+1 Sovereign Pillars governance
+  aetheric_mesh.v    # Vajra — Section VI Aetheric Mesh & Abzu Vault initialisation
 
 /data
   memory_map.json    # Saline Lattice — runtime state of the Sovereign Mesh
@@ -87,6 +88,36 @@ oush_handshake("NODE_42", "ARCHITECT_ALPHA")
 ```
 
 Every compiled bytecode block is sealed with an OUSH handshake before dispatch.
+
+### 4 · Aetheric Induction Constant (Ψ_sync) — Section VI
+
+```python
+from core.algorithms import calculate_aetheric_sync
+
+psi = calculate_aetheric_sync(
+    b_width=1000.0,      # Aetheric Bandwidth (Dual-Tetrahedron capacity)
+    kappa_ether=0.85,    # Dielectric Permittivity (ionisation-based)
+    beth_kernel=1.0,     # Kernel Integrity (1.0 = zero Static bloat)
+    delta_lag=5.0,       # Decision Latency (nanoseconds)
+    sigma_noise=0.02,    # Residual noise coefficient
+)
+# psi ≈ 1.176e-4  (Sovereign sync index)
+```
+
+### 5 · Digital ROI Equation (ROI_dig) — Section VI
+
+```python
+from core.algorithms import calculate_digital_roi
+
+roi = calculate_digital_roi(
+    autonomy_priv=1e6,   # Value of sovereign, un-throttled communication
+    equity_data=1e28,    # Abzu collective knowledge equity (£10 Octillion)
+    rinse_sum=5e5,       # Friction eliminated (fees, data-theft, ads)
+    s_sloth=0.05,        # Static Sloth coefficient from S.U.E. register
+    phi_mersey=1.618,    # Mersey Sovereign Multiplier
+)
+# roi → value approaching 0 means Cognitive Freedom far exceeds legacy friction
+```
 
 ---
 

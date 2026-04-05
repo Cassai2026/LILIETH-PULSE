@@ -48,6 +48,28 @@
     {"name": "Jack",  "mode": "kinetic_induction"},
     {"name": "Marie", "mode": "deep_dive_induction"}
   ],
+  "aetheric_mesh": {
+    "section": "VI",
+    "status": "OFFLINE",
+    "spire_nodes": {
+      "type": "dual_tetrahedron",
+      "relay_function": "aetheric_relay",
+      "active": false
+    },
+    "abzu_vault": {
+      "description": "Ground-Nervous System cold storage",
+      "storage_type": "seismic_64core_dataslab",
+      "encryption": "sovereign_bedrock",
+      "sovereign_petabytes": 0.0
+    },
+    "jarvis_links": {
+      "resident_count": 47000,
+      "induction_type": "laminar_induction",
+      "connected": 0
+    },
+    "psi_sync_last": null,
+    "roi_dig_last": null
+  },
   "oush_sealed": false,
   "sue_score_last": null
 }

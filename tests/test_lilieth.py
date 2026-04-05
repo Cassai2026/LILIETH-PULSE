@@ -15,7 +15,13 @@ import pytest
 # Ensure the repo root is on sys.path so that `core` and `biometrics` resolve.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from core.algorithms import calculate_sue_score, harvest_kinetic_energy, oush_handshake
+from core.algorithms import (
+    calculate_sue_score,
+    harvest_kinetic_energy,
+    oush_handshake,
+    calculate_aetheric_sync,
+    calculate_digital_roi,
+)
 from core.interpreter import (
     ASTNode,
     AnimusInterpreter,
@@ -263,3 +269,113 @@ class TestRootAuth:
         with pytest.raises(PermissionError):
             with RootSession("BAD_SIG", "BAD_TOKEN"):
                 pass
+
+
+# ===========================================================================
+# 5.  Section VI — Aetheric Mesh Algorithms
+# ===========================================================================
+
+class TestCalculateAethericSync:
+    def test_standard_values_return_positive(self):
+        psi = calculate_aetheric_sync(
+            b_width=1000.0,
+            kappa_ether=0.85,
+            beth_kernel=1.0,
+            delta_lag=5.0,
+            sigma_noise=0.02,
+        )
+        assert psi > 0.0
+
+    def test_formula_correctness(self):
+        # Ψ_sync = (5.0 * 0.02) / ((1000.0 * 0.85) * 1.0) = 0.1 / 850.0 ≈ 1.176e-4
+        psi = calculate_aetheric_sync(
+            b_width=1000.0,
+            kappa_ether=0.85,
+            beth_kernel=1.0,
+            delta_lag=5.0,
+            sigma_noise=0.02,
+        )
+        assert psi == pytest.approx(0.1 / 850.0, rel=1e-6)
+
+    def test_zero_delta_lag_returns_zero(self):
+        psi = calculate_aetheric_sync(
+            b_width=1000.0,
+            kappa_ether=0.85,
+            beth_kernel=1.0,
+            delta_lag=0.0,
+            sigma_noise=0.02,
+        )
+        assert psi == 0.0
+
+    def test_zero_sigma_noise_returns_zero(self):
+        psi = calculate_aetheric_sync(
+            b_width=1000.0,
+            kappa_ether=0.85,
+            beth_kernel=1.0,
+            delta_lag=5.0,
+            sigma_noise=0.0,
+        )
+        assert psi == 0.0
+
+    def test_zero_bandwidth_does_not_raise(self):
+        # denominator → 0; epsilon guard should prevent ZeroDivisionError
+        psi = calculate_aetheric_sync(
+            b_width=0.0,
+            kappa_ether=0.0,
+            beth_kernel=0.0,
+            delta_lag=5.0,
+            sigma_noise=0.02,
+        )
+        assert psi >= 0.0
+
+    def test_perfect_kernel_integrity_scales_correctly(self):
+        # beth_kernel is in the denominator, so halving it doubles Ψ_sync
+        # (higher Ψ_sync = more noise/latency relative to capacity = worse mesh quality)
+        psi_full = calculate_aetheric_sync(100.0, 1.0, 1.0, 1.0, 1.0)
+        psi_half = calculate_aetheric_sync(100.0, 1.0, 0.5, 1.0, 1.0)
+        assert psi_half == pytest.approx(psi_full * 2.0, rel=1e-5)
+
+    def test_aetheric_mesh_protocol_parses(self):
+        """The new aetheric_mesh.v protocol file must parse without errors."""
+        import os
+        parser = LiliethParser()
+        base = os.path.join(os.path.dirname(__file__), "..", "protocols")
+        nodes = parser.parse_file(os.path.join(base, "aetheric_mesh.v"))
+        assert len(nodes) > 0
+
+
+class TestCalculateDigitalROI:
+    def test_standard_values_return_positive(self):
+        roi = calculate_digital_roi(
+            autonomy_priv=1e6,
+            equity_data=1e28,
+            rinse_sum=5e5,
+            s_sloth=0.05,
+            phi_mersey=1.618,
+        )
+        assert roi > 0.0
+
+    def test_formula_correctness(self):
+        # ROI_dig = (500_000 + 0.05) / ((1e6 + 1e28) * 1.618)
+        expected = (5e5 + 0.05) / ((1e6 + 1e28) * 1.618)
+        roi = calculate_digital_roi(1e6, 1e28, 5e5, 0.05, 1.618)
+        assert roi == pytest.approx(expected, rel=1e-6)
+
+    def test_zero_rinse_and_sloth_returns_zero(self):
+        roi = calculate_digital_roi(1e6, 1e28, 0.0, 0.0, 1.618)
+        assert roi == 0.0
+
+    def test_zero_denominator_does_not_raise(self):
+        roi = calculate_digital_roi(0.0, 0.0, 1.0, 0.0, 0.0)
+        assert roi >= 0.0
+
+    def test_higher_equity_data_reduces_roi_dig(self):
+        # Larger denominator → smaller ROI_dig
+        roi_low = calculate_digital_roi(1e6, 1e10, 1e5, 0.1, 1.0)
+        roi_high = calculate_digital_roi(1e6, 1e28, 1e5, 0.1, 1.0)
+        assert roi_low > roi_high
+
+    def test_higher_rinse_sum_increases_roi_dig(self):
+        roi_small = calculate_digital_roi(1e6, 1e10, 1e4, 0.1, 1.0)
+        roi_large = calculate_digital_roi(1e6, 1e10, 1e6, 0.1, 1.0)
+        assert roi_large > roi_small
