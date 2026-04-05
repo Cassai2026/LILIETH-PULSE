@@ -11,7 +11,7 @@ root lock.
 
 ```
 /core
-  algorithms.py      # S.U.E. Validator · Indra-Vajra Harvester · OUSH Handshake
+  algorithms.py      # S.U.E. Validator · Indra-Vajra Harvester · Φ_bolt · ROI_eco · Enki-Flow · OUSH Handshake
   interpreter.py     # Extensible LiliethParser for .v / .kg / .4d / .ai files
   compiler.py        # Compiles AST nodes → sealed Bytecode via OUSH finality
 
@@ -77,7 +77,47 @@ joules = harvest_kinetic_energy(traffic_density=100.0, velocity_avg=30.0)
 The KONG interpreter listens for `take` commands in `.v` files and triggers
 this harvester automatically via a registered hook.
 
-### 3 · OUSH Finality Handshake
+### 3 · Φ_bolt — Sovereign Induction Constant
+
+```python
+from core.algorithms import calculate_phi_bolt
+
+# Fair-weather induction with 1 000× tetrahedron tip-effect
+phi = calculate_phi_bolt(e_field=100.0, delta_tetra=1000.0)
+# → 100 000.0 Sovereign Volts
+
+# Mersey storm (10 kV/m) — full atmospheric harvest
+phi_storm = calculate_phi_bolt(e_field=10_000.0, delta_tetra=1000.0, omega_ground=0.0)
+# → 10 000 000.0 Sovereign Volts
+```
+
+`E_field` (V/m) × `Δ_tetra` (tip-effect multiplier) gives the local field strength.
+`Ω_ground` → 0 with Oceanic Copper Grounding Mesh; `σ_buffer` throttles intake.
+
+### 4 · ROI_eco — Economic ROI (Sovereign Equity)
+
+```python
+from core.algorithms import calculate_roi_eco
+
+# 100-year harvest, zero operational cost, unit debt baseline
+roi = calculate_roi_eco(phi_bolt=100_000.0, t_harvest=100.0, c_ops=0.0, d_static=1.0)
+# → 10 000 000.0
+```
+
+Formula: `ROI_eco = (Φ_bolt × T_harvest − C_ops) / D_static`
+
+### 5 · Enki-Flow Pressure Management
+
+```python
+from core.algorithms import calibrate_siphon_pressure
+
+status = calibrate_siphon_pressure(depth=7400.0, gravity_head=9.81)
+# → 🌊 [FLOW]: H4O Medicine Mist initialized at … PSI.
+```
+
+Calibrates the H4O transition point at the Factorian Deep (7.4 km).
+
+### 6 · OUSH Finality Handshake
 
 ```python
 from core.algorithms import oush_handshake

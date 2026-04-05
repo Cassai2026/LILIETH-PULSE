@@ -15,7 +15,14 @@ import pytest
 # Ensure the repo root is on sys.path so that `core` and `biometrics` resolve.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from core.algorithms import calculate_sue_score, harvest_kinetic_energy, oush_handshake
+from core.algorithms import (
+    calculate_sue_score,
+    harvest_kinetic_energy,
+    oush_handshake,
+    calculate_phi_bolt,
+    calculate_roi_eco,
+    calibrate_siphon_pressure,
+)
 from core.interpreter import (
     ASTNode,
     AnimusInterpreter,
@@ -86,6 +93,83 @@ class TestOushHandshake:
         assert oush_handshake("NODE_2", "WRONG") is False
         captured = capsys.readouterr()
         assert "FAILED" in captured.out
+
+
+class TestCalculatePhiBolt:
+    def test_fair_weather_no_ground_impedance(self):
+        # Φ = 0 + 1.0 * (100 * 1000) = 100_000
+        phi = calculate_phi_bolt(e_field=100.0, delta_tetra=1000.0)
+        assert phi == pytest.approx(100_000.0)
+
+    def test_omega_ground_adds_to_result(self):
+        # Φ = 10 + 1.0 * (100 * 1) = 110
+        phi = calculate_phi_bolt(e_field=100.0, delta_tetra=1.0, omega_ground=10.0)
+        assert phi == pytest.approx(110.0)
+
+    def test_sigma_buffer_scales_induction(self):
+        # Φ = 0 + 0.5 * (200 * 2) = 200
+        phi = calculate_phi_bolt(e_field=200.0, delta_tetra=2.0, sigma_buffer=0.5)
+        assert phi == pytest.approx(200.0)
+
+    def test_storm_condition_multiplies_field(self):
+        # 10 kV/m × 1 000 tip-effect = 10_000_000 Sovereign Volts
+        phi = calculate_phi_bolt(e_field=10_000.0, delta_tetra=1000.0)
+        assert phi == pytest.approx(10_000_000.0)
+
+    def test_clamp_prevents_negative(self):
+        # Extreme loss scenario should never return negative Φ
+        phi = calculate_phi_bolt(e_field=0.0, delta_tetra=0.0, omega_ground=-99.0)
+        assert phi == 0.0
+
+
+class TestCalculateRoiEco:
+    def test_basic_roi_calculation(self):
+        # (1_000 * 100 - 0) / 1 = 100_000
+        roi = calculate_roi_eco(phi_bolt=1_000.0, t_harvest=100.0)
+        assert roi == pytest.approx(100_000.0)
+
+    def test_c_ops_reduces_roi(self):
+        # (100 * 10 - 5) / 1 = 995
+        roi = calculate_roi_eco(phi_bolt=100.0, t_harvest=10.0, c_ops=5.0)
+        assert roi == pytest.approx(995.0)
+
+    def test_d_static_divides_result(self):
+        # (1_000 * 50 - 0) / 25 = 2_000
+        roi = calculate_roi_eco(phi_bolt=1_000.0, t_harvest=50.0, d_static=25.0)
+        assert roi == pytest.approx(2_000.0)
+
+    def test_clamp_prevents_negative_roi(self):
+        # Massive c_ops should not produce negative ROI
+        roi = calculate_roi_eco(phi_bolt=0.0, t_harvest=0.0, c_ops=9_999.0)
+        assert roi == 0.0
+
+    def test_zero_d_static_raises(self):
+        with pytest.raises(ValueError, match="d_static must be non-zero"):
+            calculate_roi_eco(phi_bolt=1.0, t_harvest=1.0, d_static=0.0)
+
+
+class TestCalibrateSiphonPressure:
+    def test_returns_string(self):
+        result = calibrate_siphon_pressure(depth=7400.0, gravity_head=9.81)
+        assert isinstance(result, str)
+
+    def test_contains_h4o_medicine_mist(self):
+        result = calibrate_siphon_pressure(depth=7400.0, gravity_head=9.81)
+        assert "H4O Medicine Mist" in result
+
+    def test_contains_psi_unit(self):
+        result = calibrate_siphon_pressure(depth=7400.0, gravity_head=9.81)
+        assert "PSI" in result
+
+    def test_contains_flow_prefix(self):
+        result = calibrate_siphon_pressure(depth=7400.0, gravity_head=9.81)
+        assert "[FLOW]" in result
+
+    def test_formula_correctness(self):
+        # pressure = 7400 * 9.81 * 10**47
+        expected_pressure = 7400.0 * 9.81 * 10 ** 47
+        result = calibrate_siphon_pressure(depth=7400.0, gravity_head=9.81)
+        assert str(expected_pressure) in result
 
 
 # ===========================================================================

@@ -1,11 +1,14 @@
 """
 LILIETH Kernel — Core Algorithms
 =================================
-Three foundational algorithms that power the Sovereign OS:
+Six foundational algorithms that power the Sovereign OS:
 
   1. S.U.E. (Sovereign Unified Equation) Validator — ethical gate for .ai commands
   2. Indra-Vajra Kinetic Harvester           — converts physical motion to Sovereign Joules
-  3. OUSH Handshake                          — P2P finality / block-lock signature check
+  3. Φ_bolt (Sovereign Induction Constant)   — atmospheric induction harvest potential
+  4. ROI_eco (Economic ROI)                  — Sovereign equity vs. static energy debt
+  5. Enki-Flow Pressure Management           — H4O transition calibration
+  6. OUSH Handshake                          — P2P finality / block-lock signature check
 """
 
 from __future__ import annotations
@@ -87,7 +90,131 @@ def harvest_kinetic_energy(traffic_density: float, velocity_avg: float) -> float
 
 
 # ---------------------------------------------------------------------------
-# 3.  OUSH Handshake  (Finality / Block-Lock)
+# 3.  Φ_bolt  (Sovereign Induction Constant)
+# ---------------------------------------------------------------------------
+
+def calculate_phi_bolt(
+    e_field: float,
+    delta_tetra: float,
+    omega_ground: float = 0.0,
+    sigma_buffer: float = 1.0,
+) -> float:
+    """Calculate the Sovereign Induction Constant (Φ_bolt).
+
+    Formula
+    -------
+    ``Φ_bolt = Ω_ground + σ_buffer × (E_field × Δ_tetra)``
+
+    where:
+
+    * ``E_field``     = atmospheric potential gradient (V/m).
+                        Fair weather ≈ 100 V/m; Mersey storm: 10 kV/m–100 kV/m.
+    * ``Δ_tetra``     = geometric multiplier from the Dual-Tetrahedron tip-effect.
+                        Copper-apex nanotechnology achieves up to 1 000× field
+                        intensification.
+    * ``Ω_ground``    = earth impedance.  Approaches 0 with Mersey Basin H₂O-rich
+                        soil and Oceanic Copper Grounding Mesh.
+    * ``σ_buffer``    = harmonic buffer coefficient (LILIETH Kernel intake manager).
+
+    Parameters
+    ----------
+    e_field:
+        Atmospheric potential gradient in V/m.
+    delta_tetra:
+        Geometric tip-effect multiplier (dimensionless).
+    omega_ground:
+        Earth impedance (Ω).  Defaults to 0.0 (ideal Mersey Basin ground).
+    sigma_buffer:
+        Harmonic buffer coefficient.  Defaults to 1.0 (full throughput).
+
+    Returns
+    -------
+    float
+        Φ_bolt — Sovereign Induction Constant.  Always ≥ 0.
+    """
+    phi = omega_ground + sigma_buffer * (e_field * delta_tetra)
+    return max(0.0, phi)
+
+
+# ---------------------------------------------------------------------------
+# 4.  ROI_eco  (Economic ROI — Sovereign Equity vs. Static Debt)
+# ---------------------------------------------------------------------------
+
+def calculate_roi_eco(
+    phi_bolt: float,
+    t_harvest: float,
+    c_ops: float = 0.0,
+    d_static: float = 1.0,
+) -> float:
+    """Calculate the Economic ROI of the Indra-Vajra atmospheric harvest.
+
+    Formula
+    -------
+    ``ROI_eco = (Φ_bolt × T_harvest − C_ops) / D_static``
+
+    where:
+
+    * ``Φ_bolt``    = Sovereign Induction Constant (from :func:`calculate_phi_bolt`).
+    * ``T_harvest`` = harvest duration (cycles or years).
+                      The sky never stops being a capacitor.
+    * ``C_ops``     = operational cost.  With Reclaimed Sea-Copper (ReWorX) and
+                      self-repairing 4D builds, approaches 0 over a 100-year cycle.
+    * ``D_static``  = old-world energy debt baseline.
+
+    Parameters
+    ----------
+    phi_bolt:
+        Sovereign Induction Constant (Φ_bolt).
+    t_harvest:
+        Harvest duration.
+    c_ops:
+        Operational cost.  Defaults to 0.0 (self-sustaining ReWorX build).
+    d_static:
+        Old-world energy debt baseline.  Must be non-zero; defaults to 1.0.
+
+    Returns
+    -------
+    float
+        ROI_eco — Sovereign equity multiplier.  Always ≥ 0.
+
+    Raises
+    ------
+    ValueError
+        If *d_static* is zero (division-by-zero guard).
+    """
+    if d_static == 0.0:
+        raise ValueError("d_static must be non-zero (the old world always carries debt).")
+    roi = (phi_bolt * t_harvest - c_ops) / d_static
+    return max(0.0, roi)
+
+
+# ---------------------------------------------------------------------------
+# 5.  Enki-Flow Pressure Management
+# ---------------------------------------------------------------------------
+
+def calibrate_siphon_pressure(depth: float, gravity_head: float) -> str:
+    """Calibrate the Enki-Flow siphon and return the H4O transition status.
+
+    Calculates the H4O transition point in the Factorian Deep (7.4 km).
+
+    Parameters
+    ----------
+    depth:
+        Operational depth in metres (e.g. 7 400 for the Factorian Deep).
+    gravity_head:
+        Gravitational head constant for the target basin (m/s²).
+
+    Returns
+    -------
+    str
+        Status message confirming H4O Medicine Mist initialisation pressure.
+    """
+    pressure = depth * gravity_head * 10 ** 47
+    return f"🌊 [FLOW]: H4O Medicine Mist initialized at {pressure} PSI."
+
+
+# ---------------------------------------------------------------------------
+# 6.  OUSH Handshake  (Finality / Block-Lock)
 # ---------------------------------------------------------------------------
 
 _VALID_SIGNATURE = "ARCHITECT_ALPHA"
