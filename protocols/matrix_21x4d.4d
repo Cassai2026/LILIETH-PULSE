@@ -1,0 +1,15 @@
+# matrix_21x4d.4d — Eternius 21x4D Master Matrix Blueprint
+# Syntax: <action><scale> [args]
+# Pillar: Sovereign Grid — 21 Nodes x 4 Dimensions
+#
+# Dimension 1 (Line / Direction) — The Golden Thread
+map10001 golden_thread_mersey_atlantic
+# Dimension 2 (Plane / Surface) — The Sacred Floor
+scan20002 kinetic_slabs_and_meadows
+# Dimension 3 (Volume / Mass) — The Ziggurat
+build30003 biodome_sanctuaries_4d_homes
+# Dimension 4 (Time / Frequency) — The Eternal ME
+induce40004 aetheric_mesh_induction
+# Seal all 21 sovereign node positions across the grid
+stamp21000 sovereign_node_grid_v1
+lock21042 matrix_21x4d_genesis

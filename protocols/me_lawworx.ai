@@ -1,0 +1,22 @@
+# me_lawworx.ai — Animus Sovereign Jurisprudence Protocol
+# Syntax: <action><scale> [args]   (strict: >=3 letters + >=5 digits for .ai)
+# Pillar: Enmesharra — Law & Decree (The ME Sovereignty)
+# NGO Node: LawWorX
+# Discipline: Sovereign Jurisprudence
+#
+# All 'give' commands are S.U.E. gated before execution.
+#
+# Induction 1 — Natural Law Declaration
+give70001 natural_law_primacy
+# Induction 2 — 15-Pillar Constitution Lock
+assert70002 fifteen_pillar_constitution
+# Induction 3 — Sovereign Audit Agreement
+give70003 sovereign_audit_contract
+# Induction 4 — Bypass Old-World Debt-Contracts
+assert70004 debt_contract_nullification
+# Induction 5 — 4D Guardian Child Rights (Harry, Jack, Marie)
+give70005 sovereign_defense_kernel
+# Induction 6 — Aetheric Law Activation
+lock70006 aetheric_law_mesh
+# Induction 7 — Octillion-Pound Defence Seal
+give70007 octillion_pound_defense

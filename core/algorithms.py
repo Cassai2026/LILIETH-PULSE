@@ -93,6 +93,63 @@ def harvest_kinetic_energy(traffic_density: float, velocity_avg: float) -> float
 _VALID_SIGNATURE = "ARCHITECT_ALPHA"
 
 
+# ---------------------------------------------------------------------------
+# 4.  Ψ_law  (Psi-Law) Legal Shield Density
+# ---------------------------------------------------------------------------
+
+def calculate_psi_law(
+    pillar_scores: Dict[str, float],
+    delta_4d: float,
+    omega_sloth: float,
+    statute_scores: Dict[str, float],
+) -> float:
+    """Calculate the Ψ_law (Psi-Law) Legal Shield Density.
+
+    Formula
+    -------
+    ``Ψ_law = (Ω_sloth + Σ_statute) / (P_15 × Δ_4D)``
+
+    where:
+
+    * ``P_15``         = sum of the 15 Sovereign Pillar adherence scores
+    * ``Δ_4D``         = 4D Temporal Depth multiplier (1.0–4.0)
+    * ``Ω_sloth``      = resistance coefficient of the old-world 'Static' courts
+    * ``Σ_statute``    = aggregate interference score of unwanted 'Rinse' statutes
+
+    Parameters
+    ----------
+    pillar_scores:
+        Per-pillar adherence scores (0.0–1.0).  Typically 15 entries matching
+        the 15 Sovereign Pillars encoded in ``lilieth_core.ai``.
+    delta_4d:
+        The 4D Temporal Depth multiplier representing the fourth dimension
+        (time / frequency) in the 21 × 4D Master Matrix.  Range 1.0–4.0.
+    omega_sloth:
+        Resistance coefficient of the old world's 'Static' court system (0.0–1.0).
+    statute_scores:
+        Interference scores for each unwanted 'Rinse' statute (0.0–1.0).
+
+    Returns
+    -------
+    float
+        Ψ_law index.  A score **< 1.0** means the Sovereign legal shield is
+        active and the old world cannot initiate a 'Rinse'.  A score ≥ 1.0
+        indicates that static-court resistance exceeds pillar protection.
+
+    Notes
+    -----
+    The tiny constant ``0.0004`` prevents division-by-zero when pillar scores
+    or the 4D multiplier are zero.
+    """
+    _SOVEREIGN_GUARD = 0.0004  # prevents division-by-zero
+
+    p15 = sum(pillar_scores.values())
+    sigma_statute = sum(statute_scores.values())
+
+    psi = (omega_sloth + sigma_statute) / (p15 * delta_4d + _SOVEREIGN_GUARD)
+    return psi
+
+
 def oush_handshake(node_id: str, pulse_signature: str) -> bool:
     """Verify the P2P OUSH connection and lock a block in the .4d ledger.
 

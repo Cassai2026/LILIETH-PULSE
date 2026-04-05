@@ -43,6 +43,34 @@
       "memory", "education", "health", "fire", "water", "breath"
     ]
   },
+  "disciplines": {
+    "count": 12,
+    "tiers": {
+      "1-6": "The Physical Elements — SparkWorX, AquaWorX, GroundWorX, etc. (The Body)",
+      "7-12": "The Divine ME — LawWorX, GeneWorX, EquiWorX, BrewWorX, LightWorX, DeepWorX (The Animus)"
+    },
+    "nodes": [
+      {"id": 7,  "pillar": "Enmesharra",  "discipline": "Sovereign Jurisprudence", "ngo": "LawWorX"},
+      {"id": 8,  "pillar": "Ningishzida", "discipline": "Somatic Engineering",     "ngo": "GeneWorX"},
+      {"id": 9,  "pillar": "Inanna",      "discipline": "Dynamic Balance",          "ngo": "EquiWorX"},
+      {"id": 10, "pillar": "Ninkasi",     "discipline": "Bio-Alchemical Synthesis", "ngo": "BrewWorX"},
+      {"id": 11, "pillar": "Utu",         "discipline": "Total Transparency",       "ngo": "LightWorX"},
+      {"id": 12, "pillar": "Nammu",       "discipline": "Quantum Potential",        "ngo": "DeepWorX"}
+    ]
+  },
+  "matrix_21x4d": {
+    "total_nodes": 21,
+    "dimensions": 4,
+    "dimension_map": {
+      "1D": {"property": "Direction",      "anunnaki": "Golden Thread",  "worx": "Sovereign Spine — Mersey to Atlantic"},
+      "2D": {"property": "Surface",        "anunnaki": "Sacred Floor",   "worx": "Kinetic Slabs and Meadows"},
+      "3D": {"property": "Mass",           "anunnaki": "Ziggurat",       "worx": "Bio-Dome Sanctuaries and 4D-printed homes"},
+      "4D": {"property": "Resonance",      "anunnaki": "Eternal ME",     "worx": "Aetheric Mesh and Induction"}
+    },
+    "active": false,
+    "oush_sealed": false
+  },
+  "psi_law_last": null,
   "gifted_masters": [
     {"name": "Harry", "mode": "kinetic_induction"},
     {"name": "Jack",  "mode": "kinetic_induction"},

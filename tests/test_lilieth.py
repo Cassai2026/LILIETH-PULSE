@@ -15,7 +15,7 @@ import pytest
 # Ensure the repo root is on sys.path so that `core` and `biometrics` resolve.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from core.algorithms import calculate_sue_score, harvest_kinetic_energy, oush_handshake
+from core.algorithms import calculate_sue_score, harvest_kinetic_energy, oush_handshake, calculate_psi_law
 from core.interpreter import (
     ASTNode,
     AnimusInterpreter,
@@ -86,6 +86,36 @@ class TestOushHandshake:
         assert oush_handshake("NODE_2", "WRONG") is False
         captured = capsys.readouterr()
         assert "FAILED" in captured.out
+
+
+class TestCalculatePsiLaw:
+    def setup_method(self):
+        self._pillar_scores = {f"p{i}": 0.9 for i in range(1, 16)}   # 15 pillars at 0.9
+        self._statute_scores = {f"s{i}": 0.05 for i in range(1, 6)}  # 5 statutes at 0.05
+
+    def test_sovereign_shield_active_below_one(self):
+        # Strong pillars + high 4D depth → Ψ_law < 1.0 (shield active)
+        score = calculate_psi_law(self._pillar_scores, 4.0, 0.1, self._statute_scores)
+        assert score < 1.0
+
+    def test_static_court_dominates_above_one(self):
+        # Weak pillars + low depth + high resistance → Ψ_law ≥ 1.0
+        weak_pillars = {f"p{i}": 0.01 for i in range(1, 16)}
+        heavy_statutes = {f"s{i}": 0.9 for i in range(1, 11)}
+        score = calculate_psi_law(weak_pillars, 1.0, 1.0, heavy_statutes)
+        assert score >= 1.0
+
+    def test_zero_pillar_scores_does_not_raise(self):
+        # Division-by-zero guard (SOVEREIGN_GUARD = 0.0004) must prevent crash
+        score = calculate_psi_law({}, 0.0, 0.5, {"s1": 0.5})
+        assert score > 0
+
+    def test_formula_correctness(self):
+        # Ψ = (0.1 + 0.25) / (13.5 * 2.0 + 0.0004)  ≈ 0.012963
+        pillar_scores = {f"p{i}": 0.9 for i in range(1, 16)}  # sum = 13.5
+        statute_scores = {f"s{i}": 0.05 for i in range(1, 6)}  # sum = 0.25
+        expected = (0.1 + 0.25) / (13.5 * 2.0 + 0.0004)
+        assert calculate_psi_law(pillar_scores, 2.0, 0.1, statute_scores) == pytest.approx(expected)
 
 
 # ===========================================================================
@@ -180,7 +210,13 @@ class TestLiliethParser:
 
     def test_parse_protocol_files(self):
         base = os.path.join(os.path.dirname(__file__), "..", "protocols")
-        for fname in ("init_mesh.v", "stretford_audit.4d", "lilieth_core.ai"):
+        for fname in (
+            "init_mesh.v",
+            "stretford_audit.4d",
+            "lilieth_core.ai",
+            "me_lawworx.ai",
+            "matrix_21x4d.4d",
+        ):
             nodes = self.parser.parse_file(os.path.join(base, fname))
             assert len(nodes) > 0
 
