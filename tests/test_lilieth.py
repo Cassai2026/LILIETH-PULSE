@@ -15,7 +15,14 @@ import pytest
 # Ensure the repo root is on sys.path so that `core` and `biometrics` resolve.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from core.algorithms import calculate_sue_score, harvest_kinetic_energy, oush_handshake
+from core.algorithms import (
+    calculate_sue_score,
+    harvest_kinetic_energy,
+    oush_handshake,
+    calculate_omega_bal,
+    SOVEREIGN_NODE_COUNT,
+    OMEGA_BALANCE_STABLE_THRESHOLD,
+)
 from core.interpreter import (
     ASTNode,
     AnimusInterpreter,
@@ -263,3 +270,81 @@ class TestRootAuth:
         with pytest.raises(PermissionError):
             with RootSession("BAD_SIG", "BAD_TOKEN"):
                 pass
+
+
+# ===========================================================================
+# 5.  Ω_bal — EquiWorX Social Stability (Section IX: Pillar of Inanna)
+# ===========================================================================
+
+class TestCalculateOmegaBal:
+    def test_stable_mesh_below_threshold(self):
+        """Low friction + sloth with high sync & hearts → Ω_bal < 1 (stable)."""
+        omega = calculate_omega_bal(
+            psi_sync=0.9, sum_hearts=1000.0,
+            delta_friction=0.5, s_sloth=0.1,
+        )
+        assert omega < OMEGA_BALANCE_STABLE_THRESHOLD
+
+    def test_unstable_mesh_above_threshold(self):
+        """High friction + sloth with low sync & hearts → Ω_bal ≥ 1 (unstable)."""
+        omega = calculate_omega_bal(
+            psi_sync=0.01, sum_hearts=1.0,
+            delta_friction=10.0, s_sloth=5.0,
+        )
+        assert omega >= OMEGA_BALANCE_STABLE_THRESHOLD
+
+    def test_formula_correctness(self):
+        """Manual check: (0.5 + 0.5)² / (0.8 × 100) = 1.0 / 80.0 = 0.0125."""
+        omega = calculate_omega_bal(
+            psi_sync=0.8, sum_hearts=100.0,
+            delta_friction=0.5, s_sloth=0.5,
+        )
+        assert omega == pytest.approx(1.0 / 80.0, rel=1e-4)
+
+    def test_zero_friction_and_sloth_gives_near_zero(self):
+        """No disruption → Ω_bal ≈ 0 regardless of sync/hearts."""
+        omega = calculate_omega_bal(
+            psi_sync=1.0, sum_hearts=194481.0,
+            delta_friction=0.0, s_sloth=0.0,
+        )
+        assert omega == pytest.approx(0.0, abs=1e-6)
+
+    def test_zero_psi_sync_does_not_raise(self):
+        """Zero Ψ_sync is guarded against division-by-zero."""
+        omega = calculate_omega_bal(
+            psi_sync=0.0, sum_hearts=0.0,
+            delta_friction=1.0, s_sloth=1.0,
+        )
+        assert omega > 0
+
+    def test_negative_psi_sync_raises(self):
+        with pytest.raises(ValueError, match="psi_sync"):
+            calculate_omega_bal(
+                psi_sync=-0.1, sum_hearts=100.0,
+                delta_friction=1.0, s_sloth=1.0,
+            )
+
+    def test_negative_sum_hearts_raises(self):
+        with pytest.raises(ValueError, match="sum_hearts"):
+            calculate_omega_bal(
+                psi_sync=0.5, sum_hearts=-1.0,
+                delta_friction=1.0, s_sloth=1.0,
+            )
+
+    def test_sovereign_node_count_is_21_to_power_4(self):
+        assert SOVEREIGN_NODE_COUNT == 21 ** 4
+
+    def test_sovereign_mesh_full_scale_stable(self):
+        """194,481-node mesh at high sync with minimal disruption is stable."""
+        omega = calculate_omega_bal(
+            psi_sync=0.95, sum_hearts=float(SOVEREIGN_NODE_COUNT),
+            delta_friction=10.0, s_sloth=5.0,
+        )
+        assert omega < OMEGA_BALANCE_STABLE_THRESHOLD
+
+    def test_equiworx_protocol_file_parses(self):
+        """The equiworx_mandate.ai protocol file must parse without errors."""
+        base = os.path.join(os.path.dirname(__file__), "..", "protocols")
+        parser = LiliethParser()
+        nodes = parser.parse_file(os.path.join(base, "equiworx_mandate.ai"))
+        assert len(nodes) > 0

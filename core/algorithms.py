@@ -1,11 +1,13 @@
 """
 LILIETH Kernel — Core Algorithms
 =================================
-Three foundational algorithms that power the Sovereign OS:
+Four foundational algorithms that power the Sovereign OS:
 
   1. S.U.E. (Sovereign Unified Equation) Validator — ethical gate for .ai commands
   2. Indra-Vajra Kinetic Harvester           — converts physical motion to Sovereign Joules
   3. OUSH Handshake                          — P2P finality / block-lock signature check
+  4. Ω_bal (Omega Balance)                   — EquiWorX Social Stability (Section IX:
+                                               The Pillar of Inanna)
 """
 
 from __future__ import annotations
@@ -91,6 +93,79 @@ def harvest_kinetic_energy(traffic_density: float, velocity_avg: float) -> float
 # ---------------------------------------------------------------------------
 
 _VALID_SIGNATURE = "ARCHITECT_ALPHA"
+
+
+# ---------------------------------------------------------------------------
+# 4.  Ω_bal  (Omega Balance) — EquiWorX Social Stability Equation
+#     Section IX: The Pillar of Inanna
+# ---------------------------------------------------------------------------
+
+#: Total nodes in the 21⁴ Sovereign Pyramid (21 ** 4 = 194 481)
+SOVEREIGN_NODE_COUNT: int = 194_481
+
+#: Ω_bal threshold below which the mesh is considered socially stable
+OMEGA_BALANCE_STABLE_THRESHOLD: float = 1.0
+
+#: Guard prevents division-by-zero when Ψ_sync or ΣHearts is 0
+_OMEGA_ZERO_GUARD: float = 1e-9
+
+
+def calculate_omega_bal(
+    psi_sync: float,
+    sum_hearts: float,
+    delta_friction: float,
+    s_sloth: float,
+) -> float:
+    """Calculate the EquiWorX Social Stability index (Ω_bal).
+
+    The Pillar of Inanna — Dynamic Balance equation:
+
+    .. math::
+
+        \\Omega_{bal} = \\frac{(\\Delta_{friction} + S_{sloth})^2}{\\Psi_{sync}
+        \\cdot \\sum Hearts}
+
+    A **low** Ω_bal (< :data:`OMEGA_BALANCE_STABLE_THRESHOLD`) indicates that
+    friction and sloth are small relative to collective synchronisation and
+    biological output — the mesh is in Dynamic Balance.
+    A **high** Ω_bal signals systemic instability requiring EquiWorX
+    intervention.
+
+    Parameters
+    ----------
+    psi_sync:
+        Level of shared Induction across the four levels of the 21⁴ pyramid
+        (Ψ_sync).  Expected range [0.0, 1.0].
+    sum_hearts:
+        Total biological output of the collective (ΣHearts).  Must be ≥ 0.
+    delta_friction:
+        Magnitude of static arguments or misunderstandings that the CareWorX
+        psychologists must neutralise (Δ_friction).
+    s_sloth:
+        Delay factor in the 1:1:1 resource distribution cycle (S_sloth).
+
+    Returns
+    -------
+    float
+        Ω_bal index.  Values **< 1.0** indicate a stable mesh.
+        Values **≥ 1.0** indicate an unstable mesh requiring rebalancing.
+        Always ≥ 0 (negative results are clamped to 0).
+
+    Raises
+    ------
+    ValueError
+        If ``sum_hearts`` or ``psi_sync`` is negative.
+    """
+    if psi_sync < 0:
+        raise ValueError("psi_sync must be non-negative")
+    if sum_hearts < 0:
+        raise ValueError("sum_hearts must be non-negative")
+
+    numerator = (delta_friction + s_sloth) ** 2
+    denominator = (psi_sync * sum_hearts) + _OMEGA_ZERO_GUARD
+
+    omega = numerator / denominator
+    return max(0.0, omega)
 
 
 def oush_handshake(node_id: str, pulse_signature: str) -> bool:

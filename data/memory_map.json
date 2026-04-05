@@ -49,5 +49,19 @@
     {"name": "Marie", "mode": "deep_dive_induction"}
   ],
   "oush_sealed": false,
-  "sue_score_last": null
+  "sue_score_last": null,
+  "inanna_pillar": {
+    "section": "IX",
+    "title": "The Pillar of Inanna — EquiWorX & Dynamic Balance",
+    "sovereign_node_count": 194481,
+    "omega_bal_last": null,
+    "omega_bal_stable_threshold": 1.0,
+    "equiworx": {
+      "psi_sync": 0.0,
+      "sum_hearts": 0.0,
+      "delta_friction": 0.0,
+      "s_sloth": 0.0,
+      "balance_status": "UNINITIALISED"
+    }
+  }
 }

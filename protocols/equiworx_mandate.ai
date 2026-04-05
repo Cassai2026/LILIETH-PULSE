@@ -1,0 +1,21 @@
+# equiworx_mandate.ai — Animus: Section IX · Pillar of Inanna (EquiWorX)
+# Syntax: <action><scale> [args]
+# Mandate: Dynamic Balance across the 21^4 (194,481-node) Sovereign Mesh
+#
+# Ω_bal = (Δ_friction + S_sloth)² / (Ψ_sync · ΣHearts)
+# Target: Ω_bal < 1.0  →  mesh in Dynamic Balance
+#
+# Clause 1 — 4D Balance: SparkWorX ↔ AquaWorX equilibrium
+balance10001 sparkworx_aquaworx_equilibrium
+# Clause 2 — Family Shield: 1:1 work-life induction credit
+give20002 takiwatanga_self_time_credit
+# Clause 3 — Friction neutralisation via CareWorX psychologists
+give30003 careworkx_friction_clearance
+# Clause 4 — Sloth elimination: 1:1:1 distribution pulse
+give40004 resource_distribution_pulse
+# Clause 5 — Millionaire Standard: Ground→Tree reciprocity lock
+lock50005 groundworx_treeworkx_reciprocity
+# Clause 6 — Sky-Node fallback: Indra-Vajra compensates Mersey deficit
+balance60006 indra_vajra_mersey_compensation
+# Clause 7 — EquiWorX Seal: 194,481-node Dynamic Redundancy confirmed
+lock70007 sovereign_mesh_dynamic_redundancy
