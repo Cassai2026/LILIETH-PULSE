@@ -32,7 +32,11 @@
     "breath": {
       "method": "biogas_methane_harvest",
       "copper_straws": 0,
-      "sovereign_joules": 0.0
+      "sovereign_joules": 0.0,
+      "phi_gas_last": null,
+      "delta_leak": 0.0,
+      "roi_gen_last": null,
+      "t_100_horizon": 100
     }
   },
   "pillars": {

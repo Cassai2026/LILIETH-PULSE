@@ -15,7 +15,13 @@ import pytest
 # Ensure the repo root is on sys.path so that `core` and `biometrics` resolve.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from core.algorithms import calculate_sue_score, harvest_kinetic_energy, oush_handshake
+from core.algorithms import (
+    calculate_sue_score,
+    harvest_kinetic_energy,
+    oush_handshake,
+    calculate_biogas_induction,
+    calculate_generational_roi,
+)
 from core.interpreter import (
     ASTNode,
     AnimusInterpreter,
@@ -86,6 +92,122 @@ class TestOushHandshake:
         assert oush_handshake("NODE_2", "WRONG") is False
         captured = capsys.readouterr()
         assert "FAILED" in captured.out
+
+
+# ===========================================================================
+# 5.  Biogas Induction (Section V — Φgas)
+# ===========================================================================
+
+class TestCalculateBiogasInduction:
+    _MERSEY_SOURCES = [
+        {"v_source": 5000.0, "c_ch4": 0.65, "mu_ext": 0.92},
+        {"v_source": 3000.0, "c_ch4": 0.72, "mu_ext": 0.90},
+        {"v_source": 2000.0, "c_ch4": 0.60, "mu_ext": 0.88},
+    ]
+
+    def test_positive_harvest_no_leak(self):
+        result = calculate_biogas_induction(self._MERSEY_SOURCES, delta_leak=0.0)
+        assert result > 0.0
+
+    def test_formula_correctness(self):
+        # Σ = 5000×0.65×0.92 + 3000×0.72×0.90 + 2000×0.60×0.88
+        # = 2990.0 + 1944.0 + 1056.0 = 5990.0
+        expected = 5990.0
+        assert calculate_biogas_induction(self._MERSEY_SOURCES) == pytest.approx(expected)
+
+    def test_delta_leak_reduces_result(self):
+        no_leak = calculate_biogas_induction(self._MERSEY_SOURCES, delta_leak=0.0)
+        with_leak = calculate_biogas_induction(self._MERSEY_SOURCES, delta_leak=500.0)
+        assert with_leak == pytest.approx(no_leak - 500.0)
+
+    def test_large_leak_clamped_to_zero(self):
+        result = calculate_biogas_induction(self._MERSEY_SOURCES, delta_leak=1e9)
+        assert result == 0.0
+
+    def test_empty_sources_returns_zero(self):
+        assert calculate_biogas_induction([]) == 0.0
+
+    def test_high_purity_pocket_included(self):
+        src = [{"v_source": 1000.0, "c_ch4": 0.95, "mu_ext": 1.0}]
+        assert calculate_biogas_induction(src) == pytest.approx(950.0)
+
+    def test_missing_key_raises_value_error(self):
+        with pytest.raises(ValueError, match="v_source"):
+            calculate_biogas_induction([{"c_ch4": 0.6, "mu_ext": 0.9}])
+
+    def test_invalid_c_ch4_raises_value_error(self):
+        with pytest.raises(ValueError, match="c_ch4"):
+            calculate_biogas_induction([{"v_source": 100, "c_ch4": 1.5, "mu_ext": 0.9}])
+
+    def test_invalid_mu_ext_raises_value_error(self):
+        with pytest.raises(ValueError, match="mu_ext"):
+            calculate_biogas_induction([{"v_source": 100, "c_ch4": 0.6, "mu_ext": -0.1}])
+
+    def test_negative_delta_leak_raises_value_error(self):
+        with pytest.raises(ValueError, match="delta_leak"):
+            calculate_biogas_induction(self._MERSEY_SOURCES, delta_leak=-1.0)
+
+
+# ===========================================================================
+# 6.  Generational ROI (Section V — ROIgen)
+# ===========================================================================
+
+class TestCalculateGenerationalRoi:
+    def test_sovereign_spine_above_one(self):
+        # Large debt erased by strong Kernel + FamilySec over 100 years
+        roi = calculate_generational_roi(
+            debt_inheritance=1_000_000.0,
+            s_sloth=500_000.0,
+            kernel_sync=50.0,
+            family_sec=50.0,
+            t_100=100.0,
+        )
+        assert roi == pytest.approx(150.0)
+
+    def test_formula_correctness(self):
+        # (200 + 100) / ((3 + 7) * 10) = 300 / 100 = 3.0
+        roi = calculate_generational_roi(
+            debt_inheritance=200.0,
+            s_sloth=100.0,
+            kernel_sync=3.0,
+            family_sec=7.0,
+            t_100=10.0,
+        )
+        assert roi == pytest.approx(3.0)
+
+    def test_zero_debt_returns_zero(self):
+        roi = calculate_generational_roi(
+            debt_inheritance=0.0,
+            s_sloth=0.0,
+            kernel_sync=5.0,
+            family_sec=5.0,
+        )
+        assert roi == pytest.approx(0.0)
+
+    def test_default_t100_is_100_years(self):
+        roi_default = calculate_generational_roi(100.0, 0.0, 1.0, 1.0)
+        roi_explicit = calculate_generational_roi(100.0, 0.0, 1.0, 1.0, t_100=100.0)
+        assert roi_default == pytest.approx(roi_explicit)
+
+    def test_negative_debt_raises_value_error(self):
+        with pytest.raises(ValueError, match="debt_inheritance"):
+            calculate_generational_roi(-1.0, 0.0, 1.0, 1.0)
+
+    def test_negative_sloth_raises_value_error(self):
+        with pytest.raises(ValueError, match="s_sloth"):
+            calculate_generational_roi(0.0, -1.0, 1.0, 1.0)
+
+    def test_zero_kernel_sync_raises_value_error(self):
+        with pytest.raises(ValueError, match="kernel_sync"):
+            calculate_generational_roi(100.0, 0.0, 0.0, 1.0)
+
+    def test_zero_family_sec_raises_value_error(self):
+        with pytest.raises(ValueError, match="family_sec"):
+            calculate_generational_roi(100.0, 0.0, 1.0, 0.0)
+
+    def test_zero_t100_raises_value_error(self):
+        with pytest.raises(ValueError, match="t_100"):
+            calculate_generational_roi(100.0, 0.0, 1.0, 1.0, t_100=0.0)
 
 
 # ===========================================================================
