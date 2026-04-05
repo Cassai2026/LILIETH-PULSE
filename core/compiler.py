@@ -96,6 +96,7 @@ class LiliethCompiler:
         ".kg": "KONG",
         ".4d": "ETERNIUS",
         ".ai": "ANIMUS",
+        ".gw": "GROUNDWORX",
     }
 
     def __init__(self, parser: Optional[LiliethParser] = None) -> None:

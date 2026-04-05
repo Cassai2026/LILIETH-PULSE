@@ -22,7 +22,20 @@
     "earth": {
       "method": "kinetic_slab_piezo",
       "road": "A56",
-      "sovereign_joules": 0.0
+      "sovereign_joules": 0.0,
+      "groundworx": {
+        "protocol": "Tectonic-Tread Matrix",
+        "section": "III",
+        "slab_material": "Reclaimed Sea-Copper + Self-Healing Bio-Polymer",
+        "slab_deflection_mm": [2, 5],
+        "piezo_coefficient": 0.92,
+        "tetra_anchors": ["N", "S", "E", "W"],
+        "a56_daily_vehicles": 30000,
+        "phi_seis_joules": 0.0,
+        "roi_bio_index": 0.0,
+        "residents": 47000,
+        "daily_step_mandate": 30000
+      }
     },
     "fire": {
       "method": "plasma_gasification",

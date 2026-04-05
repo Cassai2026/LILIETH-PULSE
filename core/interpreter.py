@@ -38,7 +38,13 @@ import re
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
-from core.algorithms import calculate_sue_score, harvest_kinetic_energy, oush_handshake
+from core.algorithms import (
+    calculate_biological_roi,
+    calculate_sue_score,
+    calculate_tectonic_tread_constant,
+    harvest_kinetic_energy,
+    oush_handshake,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -277,6 +283,118 @@ class AnimusInterpreter(BaseInterpreter):
 
 
 # ---------------------------------------------------------------------------
+# 5.  GroundWorX Interpreter  (.gw)
+# ---------------------------------------------------------------------------
+
+class GroundWorXInterpreter(BaseInterpreter):
+    """Interpreter for .gw (GroundWorX) — Tectonic-Tread Matrix / Biological ROI.
+
+    Handles two primary command families:
+
+    * ``tread`` — triggers the Tectonic-Tread Constant (Φ_seis) calculation
+      using the configured A56 kinetic-slab parameters.
+    * ``stride`` — triggers the Biological ROI (ROI_bio) calculation using
+      the configured resident biometric profile.
+
+    All other commands are logged as GroundWorX infrastructure operations
+    (e.g. ``anchor``, ``weave``, ``harvest``).
+    """
+
+    extension = ".gw"
+
+    # Default A56 corridor parameters (single representative source vector)
+    _DEFAULT_MASSES: List[float] = [20_000.0]       # kg — average mixed traffic
+    _DEFAULT_DISPLACEMENTS: List[float] = [0.003]   # m  — 3 mm slab deflection
+    _DEFAULT_FREQUENCIES: List[float] = [120_000.0] # impacts/day (30k veh × 4 wheels)
+    _DEFAULT_PIEZO: float = 0.92                     # Oceanic Copper ceramic ζ
+
+    # Default resident biometric profile
+    _DEFAULT_B_PULSE: float = 0.85          # biometric vitality score
+    _DEFAULT_STEPS: float = 30_000.0        # daily step mandate
+    _DEFAULT_MU: float = 0.78               # Sovereign Shoe induction efficiency
+    _DEFAULT_DELTA_TOX: float = 0.15        # A56 pollution drag (pre-Co2WorX)
+    _DEFAULT_S_SEDENTARY: float = 0.10      # sedentary behaviour cost
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._masses = list(self._DEFAULT_MASSES)
+        self._displacements = list(self._DEFAULT_DISPLACEMENTS)
+        self._frequencies = list(self._DEFAULT_FREQUENCIES)
+        self._piezo = self._DEFAULT_PIEZO
+        self._b_pulse = self._DEFAULT_B_PULSE
+        self._steps = self._DEFAULT_STEPS
+        self._mu = self._DEFAULT_MU
+        self._delta_tox = self._DEFAULT_DELTA_TOX
+        self._s_sedentary = self._DEFAULT_S_SEDENTARY
+
+    def set_tectonic_params(
+        self,
+        masses: List[float],
+        displacements: List[float],
+        frequencies: List[float],
+        piezo_coefficient: float,
+    ) -> None:
+        """Override the A56 kinetic-slab parameters for Φ_seis calculation."""
+        self._masses = list(masses)
+        self._displacements = list(displacements)
+        self._frequencies = list(frequencies)
+        self._piezo = piezo_coefficient
+
+    def set_biometric_params(
+        self,
+        b_pulse: float,
+        steps: float,
+        induction_multiplier: float,
+        delta_tox: float,
+        s_sedentary: float,
+    ) -> None:
+        """Override the resident biometric profile for ROI_bio calculation."""
+        self._b_pulse = b_pulse
+        self._steps = steps
+        self._mu = induction_multiplier
+        self._delta_tox = delta_tox
+        self._s_sedentary = s_sedentary
+
+    def execute_node(self, node: ASTNode) -> Dict[str, Any]:
+        result = node.to_dict()
+        if node.action == "tread":
+            phi_seis = calculate_tectonic_tread_constant(
+                self._masses,
+                self._displacements,
+                self._frequencies,
+                self._piezo,
+            )
+            result["phi_seis"] = phi_seis
+            result["groundworx_status"] = (
+                f"tectonic_harvest:{phi_seis:.4f}J"
+            )
+        elif node.action == "stride":
+            roi_bio = calculate_biological_roi(
+                self._b_pulse,
+                self._steps,
+                self._mu,
+                self._delta_tox,
+                self._s_sedentary,
+            )
+            result["roi_bio"] = roi_bio
+            result["groundworx_status"] = (
+                f"biological_roi:{roi_bio:.4f}"
+            )
+        elif node.action == "lock":
+            node_id = node.args if node.args else f"groundworx_{node.line_no}"
+            locked = oush_handshake(node_id, "ARCHITECT_ALPHA")
+            result["oush_locked"] = locked
+            result["groundworx_status"] = (
+                f"tectonic_lock:{'SEALED' if locked else 'FAILED'}@{node.scale}"
+            )
+        else:
+            result["groundworx_status"] = (
+                f"groundworx_exec:{node.action}@{node.scale}"
+            )
+        return result
+
+
+# ---------------------------------------------------------------------------
 # Main Parser (The Foundry)
 # ---------------------------------------------------------------------------
 
@@ -289,6 +407,7 @@ class LiliethParser:
     * ``.kg``  — KONG (physical execution / material integrity)
     * ``.4d``  — Eternius (spatial / temporal blueprints)
     * ``.ai``  — Animus (ethical governance / 14+1 Pillars)
+    * ``.gw``  — GroundWorX (Tectonic-Tread Matrix / Biological ROI)
 
     Additional interpreters can be registered at runtime via
     :meth:`register_interpreter`.
@@ -315,11 +434,12 @@ class LiliethParser:
         kong = KongInterpreter()
         eternius = EterniusInterpreter()
         animus = AnimusInterpreter()
+        groundworx = GroundWorXInterpreter()
 
         # Wire up the KONG listener: fires whenever a Vajra 'take' is hit.
         vajra.register_hook("take", kong.handle_vajra_take)
 
-        for interp in (vajra, kong, eternius, animus):
+        for interp in (vajra, kong, eternius, animus, groundworx):
             self.register_interpreter(interp)
 
     # ------------------------------------------------------------------
