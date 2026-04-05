@@ -1,6 +1,6 @@
 {
   "_comment": "LILIETH Saline Lattice Memory Map — Sovereign OS runtime state",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "mesh": {
     "node_count": 15000000000,
     "active_nodes": 0,
@@ -17,7 +17,24 @@
     "water": {
       "method": "lip_turbine",
       "rivers": ["Mersey", "Niagara"],
-      "sovereign_joules": 0.0
+      "sovereign_joules": 0.0,
+      "enki_flow": {
+        "protocol": "Enki-Flow",
+        "turbine_type": "Lemniscate_Figure-of-Eight",
+        "turbine_efficiency_eta": 0.94,
+        "rho_kg_per_m3": 1025.0,
+        "g_m_per_s2": 9.81,
+        "flow_rate_Q_m3_per_s": 0.0,
+        "sovereign_head_delta_h_m": 0.0,
+        "phi_mersey_watts": 0.0,
+        "sovereign_spine_material": "Oceanic_Copper",
+        "sovereign_spine_route": "Mersey_to_Stretford_Meadows",
+        "residents_served": 47000,
+        "gravity_battery_tanks": 47000,
+        "careworkx_purity_online": false,
+        "digital_ether_carrier": "H2O_molecular_signal",
+        "horizon_year": 2046
+      }
     },
     "earth": {
       "method": "kinetic_slab_piezo",
@@ -34,6 +51,16 @@
       "copper_straws": 0,
       "sovereign_joules": 0.0
     }
+  },
+  "social_roi": {
+    "V_pure_litres_per_day": 0.0,
+    "psi_pow_watts": 0.0,
+    "sigma_time_hours_per_day": 0.0,
+    "S_sloth_gbp_per_day": 0.0,
+    "delta_bill_gbp_per_day": 0.0,
+    "roi_soc_last": null,
+    "poverty_deletion_threshold": 1.0,
+    "octillion_valuation_gbp": 1e28
   },
   "pillars": {
     "count": 15,

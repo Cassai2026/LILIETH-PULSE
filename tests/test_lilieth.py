@@ -16,6 +16,7 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from core.algorithms import calculate_sue_score, harvest_kinetic_energy, oush_handshake
+from core.algorithms import calculate_enki_flow, calculate_social_roi
 from core.interpreter import (
     ASTNode,
     AnimusInterpreter,
@@ -263,3 +264,155 @@ class TestRootAuth:
         with pytest.raises(PermissionError):
             with RootSession("BAD_SIG", "BAD_TOKEN"):
                 pass
+
+
+# ===========================================================================
+# 5.  Enki-Flow Constant  (Φ_mersey)
+# ===========================================================================
+
+class TestCalculateEnkiFlow:
+    # Reference values for a 1-metre sovereign head at standard Mersey conditions:
+    # η=0.94, ρ=1025 kg/m³, g=9.81 m/s², Q=1.0 m³/s, Δh=1.0 m
+    # Φ = 0.94 × 1025 × 9.81 × 1.0 × 1.0 ≈ 9446.895 W
+    _ETA = 0.94
+    _RHO = 1025.0
+    _G = 9.81
+    _Q = 1.0
+    _DH = 1.0
+
+    def test_standard_conditions_positive(self):
+        phi = calculate_enki_flow(self._ETA, self._RHO, self._G, self._Q, self._DH)
+        assert phi > 0
+
+    def test_formula_correctness(self):
+        # 0.94 × 1025 × 9.81 × 1.0 × 1.0 = 9446.895
+        expected = 0.94 * 1025.0 * 9.81 * 1.0 * 1.0
+        assert calculate_enki_flow(self._ETA, self._RHO, self._G, self._Q, self._DH) == pytest.approx(expected)
+
+    def test_zero_head_returns_zero(self):
+        assert calculate_enki_flow(self._ETA, self._RHO, self._G, self._Q, 0.0) == 0.0
+
+    def test_zero_flow_returns_zero(self):
+        assert calculate_enki_flow(self._ETA, self._RHO, self._G, 0.0, self._DH) == 0.0
+
+    def test_negative_clamped_to_zero(self):
+        # Negative eta would be nonsensical; clamp must prevent negative output.
+        assert calculate_enki_flow(-1.0, self._RHO, self._G, self._Q, self._DH) == 0.0
+
+    def test_lemniscate_beats_traditional_turbine(self):
+        # η_lemniscate=0.94 must exceed a traditional turbine (η_traditional=0.60).
+        phi_lemniscate = calculate_enki_flow(0.94, self._RHO, self._G, self._Q, self._DH)
+        phi_traditional = calculate_enki_flow(0.60, self._RHO, self._G, self._Q, self._DH)
+        assert phi_lemniscate > phi_traditional
+
+    def test_increased_density_increases_output(self):
+        # Oceanic Copper enrichment raises ρ; output must scale accordingly.
+        phi_standard = calculate_enki_flow(self._ETA, 1000.0, self._G, self._Q, self._DH)
+        phi_enriched = calculate_enki_flow(self._ETA, 1025.0, self._G, self._Q, self._DH)
+        assert phi_enriched > phi_standard
+
+    def test_large_flow_rate_scales_linearly(self):
+        # Doubling Q must double Φ.
+        phi_base = calculate_enki_flow(self._ETA, self._RHO, self._G, 10.0, self._DH)
+        phi_double = calculate_enki_flow(self._ETA, self._RHO, self._G, 20.0, self._DH)
+        assert phi_double == pytest.approx(phi_base * 2)
+
+
+# ===========================================================================
+# 6.  Social ROI  (ROI_soc)
+# ===========================================================================
+
+class TestCalculateSocialRoi:
+    # Baseline: a meaningful community scenario
+    # S_sloth=5000, Δ_bill=20000, V_pure=47000, Ψ_pow=10000, Σ_time=2.0
+    # ROI_soc = (5000+20000) / ((47000+10000)*2) ≈ 0.2193
+    _V_PURE = 47000.0
+    _PSI_POW = 10000.0
+    _SIGMA_TIME = 2.0
+    _S_SLOTH = 5000.0
+    _DELTA_BILL = 20000.0
+
+    def test_returns_positive_float(self):
+        roi = calculate_social_roi(
+            self._V_PURE, self._PSI_POW, self._SIGMA_TIME,
+            self._S_SLOTH, self._DELTA_BILL,
+        )
+        assert roi > 0.0
+
+    def test_formula_correctness(self):
+        numerator = self._S_SLOTH + self._DELTA_BILL
+        denominator = (self._V_PURE + self._PSI_POW) * self._SIGMA_TIME
+        expected = numerator / denominator
+        roi = calculate_social_roi(
+            self._V_PURE, self._PSI_POW, self._SIGMA_TIME,
+            self._S_SLOTH, self._DELTA_BILL,
+        )
+        assert roi == pytest.approx(expected, rel=1e-6)
+
+    def test_zero_outputs_does_not_raise(self):
+        # When V_pure=0 and psi_pow=0, _SOCIAL_ROI_GUARD prevents division-by-zero,
+        # returning a large but finite positive value.
+        roi = calculate_social_roi(0.0, 0.0, 1.0, self._S_SLOTH, self._DELTA_BILL)
+        assert roi > 0  # guard mechanism ensures finite result
+
+    def test_zero_sigma_time_does_not_raise(self):
+        roi = calculate_social_roi(
+            self._V_PURE, self._PSI_POW, 0.0, self._S_SLOTH, self._DELTA_BILL,
+        )
+        assert roi >= 0  # guarded
+
+    def test_increasing_bills_increases_roi(self):
+        roi_low = calculate_social_roi(
+            self._V_PURE, self._PSI_POW, self._SIGMA_TIME, self._S_SLOTH, 1000.0,
+        )
+        roi_high = calculate_social_roi(
+            self._V_PURE, self._PSI_POW, self._SIGMA_TIME, self._S_SLOTH, 50000.0,
+        )
+        assert roi_high > roi_low
+
+    def test_increasing_sovereign_output_decreases_roi(self):
+        # More output (higher V_pure) means the burden ratio shrinks — efficient system.
+        SMALL_V_PURE = 1000.0
+        LARGE_V_PURE = 1_000_000.0
+        roi_small = calculate_social_roi(
+            SMALL_V_PURE, self._PSI_POW, self._SIGMA_TIME, self._S_SLOTH, self._DELTA_BILL,
+        )
+        roi_large = calculate_social_roi(
+            LARGE_V_PURE, self._PSI_POW, self._SIGMA_TIME, self._S_SLOTH, self._DELTA_BILL,
+        )
+        assert roi_large < roi_small
+
+
+# ===========================================================================
+# 7.  Enki-Flow Protocol File
+# ===========================================================================
+
+class TestEnkiFlowProtocol:
+    def setup_method(self):
+        self.parser = LiliethParser()
+
+    def test_protocol_file_parses_without_error(self):
+        base = os.path.join(os.path.dirname(__file__), "..", "protocols")
+        nodes = self.parser.parse_file(os.path.join(base, "enki_flow.4d"))
+        assert len(nodes) > 0
+
+    def test_protocol_file_contains_lock_node(self):
+        base = os.path.join(os.path.dirname(__file__), "..", "protocols")
+        nodes = self.parser.parse_file(os.path.join(base, "enki_flow.4d"))
+        lock_nodes = [n for n in nodes if n.action == "lock"]
+        assert len(lock_nodes) >= 1
+
+    def test_protocol_file_executes_and_seals(self):
+        base = os.path.join(os.path.dirname(__file__), "..", "protocols")
+        results = self.parser.parse_and_execute(os.path.join(base, "enki_flow.4d"))
+        lock_results = [r for r in results if r.get("oush_locked") is True]
+        assert len(lock_results) >= 1
+
+    def test_protocol_compiles_with_oush_seal(self):
+        base = os.path.join(os.path.dirname(__file__), "..", "protocols")
+        compiler = LiliethCompiler()
+        bc = compiler.compile_file(
+            os.path.join(base, "enki_flow.4d"), node_id="enki_flow_node",
+        )
+        assert bc.oush_sealed is True
+        assert bc.source_ext == ".4d"
