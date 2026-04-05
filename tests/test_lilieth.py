@@ -7,8 +7,10 @@ biometric root auth, and the protocol files.
 
 from __future__ import annotations
 
+import os
+import sys
+
 import pytest
-import sys, os
 
 # Ensure the repo root is on sys.path so that `core` and `biometrics` resolve.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -95,15 +97,15 @@ class TestLiliethParser:
         self.parser = LiliethParser()
 
     def test_parse_valid_vajra_source(self):
-        src = "ignite100 spark\ntake500\n"
+        src = "ignite10000 spark\ntake50000\n"
         nodes = self.parser.parse_source(src, ".v")
         assert len(nodes) == 2
         assert nodes[0].action == "ignite"
-        assert nodes[0].scale == "100"
+        assert nodes[0].scale == "10000"
         assert nodes[1].action == "take"
 
     def test_parse_skips_comments_and_blanks(self):
-        src = "# comment\n\nignite100\n"
+        src = "# comment\n\nignite10000\n"
         nodes = self.parser.parse_source(src, ".v")
         assert len(nodes) == 1
 
@@ -111,8 +113,18 @@ class TestLiliethParser:
         with pytest.raises(ParseError):
             self.parser.parse_source("!!!bad", ".v")
 
+    def test_strict_format_enforced_on_v(self):
+        """Short tokens (< 3 letters or < 5 digits) must raise in strict .v files."""
+        with pytest.raises(ParseError, match="abc12345 format"):
+            self.parser.parse_source("ignite100 short_scale\n", ".v")
+
+    def test_strict_format_enforced_on_ai(self):
+        """Short tokens must raise in strict .ai files."""
+        with pytest.raises(ParseError, match="abc12345 format"):
+            self.parser.parse_source("give100 short\n", ".ai")
+
     def test_parse_and_execute_vajra(self):
-        src = "ignite100 spark\n"
+        src = "ignite10000 spark\n"
         nodes = self.parser.parse_source(src, ".v")
         results = self.parser.execute(nodes)
         assert results[0]["vajra_induction"].startswith("logic_pulse:")
@@ -173,11 +185,11 @@ class TestLiliethParser:
 
     def test_vajra_take_hook_fires_kong_listener(self, capsys):
         """Verify the cross-module hook: Vajra 'take' triggers KONG harvester."""
-        src = "take500 sky_ionic\n"
+        src = "take50000 sky_ionic\n"
         nodes = self.parser.parse_source(src, ".v")
         self.parser.execute(nodes)
         out = capsys.readouterr().out
-        assert "KONG" in out or "Sovereign Joules" in out or "kinetic" in out.lower()
+        assert "KONG" in out
 
 
 # ===========================================================================
@@ -192,7 +204,7 @@ class TestLiliethCompiler:
         return LiliethParser().parse_source(src, ext)
 
     def test_compile_vajra(self):
-        nodes = self._make_nodes("ignite100 spark\ntake500\n", ".v")
+        nodes = self._make_nodes("ignite10000 spark\ntake50000\n", ".v")
         bc = self.compiler.compile_nodes(nodes, "test_node")
         assert bc.oush_sealed is True
         assert bc.source_ext == ".v"
@@ -209,7 +221,8 @@ class TestLiliethCompiler:
             self.compiler.compile_nodes([])
 
     def test_noop_optimisation(self):
-        nodes = self._make_nodes("noop00\nnoop00\nnoop00\n", ".v")
+        # Use .kg (non-strict extension) so short tokens are valid
+        nodes = self._make_nodes("noop00\nnoop00\nnoop00\n", ".kg")
         bc = self.compiler.compile_nodes(nodes)
         # Three consecutive noops should collapse to one
         assert len(bc.instructions) == 1

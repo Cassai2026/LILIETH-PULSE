@@ -52,7 +52,11 @@ TOKEN_PATTERN = re.compile(
 )
 
 # Minimal "abc12345" token requires at least 3 letters + 5 digits.
+# Used to validate tokens in strict-mode extensions (.ai, .v).
 ABC12345_PATTERN = re.compile(r"^[a-zA-Z]{3,}[0-9]{5,}")
+
+# Extensions that require the strict abc12345 minimum token format.
+_STRICT_EXTENSIONS: frozenset[str] = frozenset({".ai", ".v"})
 
 
 class ParseError(Exception):
@@ -381,6 +385,14 @@ class LiliethParser:
             action = match.group("action")
             scale = match.group("scale")
             args = match.group("args")
+
+            # Enforce the full abc12345 format (≥3 letters + ≥5 digits) for
+            # strict extensions (.ai governance commands and .v induction math).
+            if ext in _STRICT_EXTENSIONS and not ABC12345_PATTERN.match(line):
+                raise ParseError(
+                    f"[{ext}:{line_no}] Token does not meet abc12345 format "
+                    f"(≥3 action letters + ≥5 scale digits): {raw_line!r}"
+                )
 
             nodes.append(
                 ASTNode(
