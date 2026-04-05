@@ -15,7 +15,13 @@ import pytest
 # Ensure the repo root is on sys.path so that `core` and `biometrics` resolve.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from core.algorithms import calculate_sue_score, harvest_kinetic_energy, oush_handshake
+from core.algorithms import (
+    calculate_phi_fire,
+    calculate_roi_env,
+    calculate_sue_score,
+    harvest_kinetic_energy,
+    oush_handshake,
+)
 from core.interpreter import (
     ASTNode,
     AnimusInterpreter,
@@ -88,6 +94,103 @@ class TestOushHandshake:
         assert "FAILED" in captured.out
 
 
+class TestCalculatePhiFire:
+    def test_positive_inputs_return_positive(self):
+        phi = calculate_phi_fire(
+            m_waste=47000.0, delta_tox=0.01,
+            q_plasma=5.0, delta_t=4800.0, e_ash_sum=2350.0,
+        )
+        assert phi > 0.0
+
+    def test_formula_correctness(self):
+        # numerator = 47000 * 0.01 = 470
+        # denominator = (5.0 * 4800.0) + 2350.0 = 26350.0  (+guard ≈ 0)
+        # phi ≈ 470 / 26350 ≈ 0.017837
+        phi = calculate_phi_fire(
+            m_waste=47000.0, delta_tox=0.01,
+            q_plasma=5.0, delta_t=4800.0, e_ash_sum=2350.0,
+        )
+        assert phi == pytest.approx(470.0 / 26350.0, rel=1e-5)
+
+    def test_zero_waste_returns_zero(self):
+        phi = calculate_phi_fire(
+            m_waste=0.0, delta_tox=0.5,
+            q_plasma=5.0, delta_t=4800.0, e_ash_sum=2350.0,
+        )
+        assert phi == 0.0
+
+    def test_zero_tox_coefficient_returns_zero(self):
+        phi = calculate_phi_fire(
+            m_waste=47000.0, delta_tox=0.0,
+            q_plasma=5.0, delta_t=4800.0, e_ash_sum=2350.0,
+        )
+        assert phi == 0.0
+
+    def test_zero_denominator_does_not_raise(self):
+        # q_plasma=0, delta_t=0, e_ash_sum=0 → guarded by 1e-9
+        phi = calculate_phi_fire(
+            m_waste=100.0, delta_tox=1.0,
+            q_plasma=0.0, delta_t=0.0, e_ash_sum=0.0,
+        )
+        assert phi >= 0.0
+
+    def test_high_plasma_reduces_phi(self):
+        low_q = calculate_phi_fire(
+            m_waste=1000.0, delta_tox=0.5, q_plasma=1.0, delta_t=100.0, e_ash_sum=0.0,
+        )
+        high_q = calculate_phi_fire(
+            m_waste=1000.0, delta_tox=0.5, q_plasma=100.0, delta_t=100.0, e_ash_sum=0.0,
+        )
+        assert low_q > high_q
+
+
+class TestCalculateRoiEnv:
+    def test_positive_inputs_return_positive(self):
+        roi = calculate_roi_env(
+            carbon_seq=1200.0, soil_vit=850.0, growth_multiplier=5.0,
+            landfill_vol=94000.0, emission_stat=3100.0,
+        )
+        assert roi > 0.0
+
+    def test_formula_correctness(self):
+        # numerator = (1200 + 850) * 5.0 = 10250
+        # denominator = 94000 + 3100 = 97100  (+guard ≈ 0)
+        # roi ≈ 10250 / 97100 ≈ 0.10556
+        roi = calculate_roi_env(
+            carbon_seq=1200.0, soil_vit=850.0, growth_multiplier=5.0,
+            landfill_vol=94000.0, emission_stat=3100.0,
+        )
+        assert roi == pytest.approx(10250.0 / 97100.0, rel=1e-5)
+
+    def test_net_gain_above_one(self):
+        # regeneration >> damage → ROI_env > 1.0
+        roi = calculate_roi_env(
+            carbon_seq=100000.0, soil_vit=100000.0, growth_multiplier=10.0,
+            landfill_vol=1.0, emission_stat=1.0,
+        )
+        assert roi > 1.0
+
+    def test_zero_sequestration_returns_zero(self):
+        roi = calculate_roi_env(
+            carbon_seq=0.0, soil_vit=0.0, growth_multiplier=5.0,
+            landfill_vol=94000.0, emission_stat=3100.0,
+        )
+        assert roi == 0.0
+
+    def test_zero_denominator_does_not_raise(self):
+        roi = calculate_roi_env(
+            carbon_seq=500.0, soil_vit=500.0, growth_multiplier=3.0,
+            landfill_vol=0.0, emission_stat=0.0,
+        )
+        assert roi >= 0.0
+
+    def test_higher_growth_multiplier_increases_roi(self):
+        kwargs = dict(carbon_seq=500.0, soil_vit=500.0, landfill_vol=1000.0, emission_stat=500.0)
+        low = calculate_roi_env(growth_multiplier=1.0, **kwargs)
+        high = calculate_roi_env(growth_multiplier=10.0, **kwargs)
+        assert high > low
+
+
 # ===========================================================================
 # 2.  Parser
 # ===========================================================================
@@ -155,6 +258,49 @@ class TestLiliethParser:
         results = self.parser.execute(nodes)
         assert "sovereign_joules" in results[0]
 
+    def test_kong_dissociate_triggers_phi_fire(self):
+        src = "dissociate47000 static_msw_input\n"
+        nodes = self.parser.parse_source(src, ".kg")
+        results = self.parser.execute(nodes)
+        assert "phi_fire" in results[0]
+        assert results[0]["phi_fire"] >= 0.0
+        assert "plasma_dissociation" in results[0]["kong_status"]
+
+    def test_kong_sequester_triggers_roi_env(self):
+        src = "sequester20046 stretford_meadows\n"
+        nodes = self.parser.parse_source(src, ".kg")
+        results = self.parser.execute(nodes)
+        assert "roi_env" in results[0]
+        assert results[0]["roi_env"] >= 0.0
+        assert "carbon_sequestration" in results[0]["kong_status"]
+
+    def test_kong_set_phi_fire_params(self):
+        kong = KongInterpreter()
+        kong.set_phi_fire_params(
+            m_waste=1000.0, delta_tox=0.5,
+            q_plasma=2.0, delta_t=1000.0, e_ash_sum=100.0,
+        )
+        parser = LiliethParser()
+        parser.register_interpreter(kong)
+        nodes = parser.parse_source("dissociate10000 test_waste\n", ".kg")
+        results = parser.execute(nodes)
+        expected_phi = calculate_phi_fire(1000.0, 0.5, 2.0, 1000.0, 100.0)
+        assert results[0]["phi_fire"] == pytest.approx(expected_phi)
+
+    def test_kong_set_roi_env_params(self):
+        kong = KongInterpreter()
+        kong.set_roi_env_params(
+            carbon_seq=500.0, soil_vit=300.0,
+            growth_multiplier=3.0,
+            landfill_vol=5000.0, emission_stat=1000.0,
+        )
+        parser = LiliethParser()
+        parser.register_interpreter(kong)
+        nodes = parser.parse_source("sequester10000 meadow_test\n", ".kg")
+        results = parser.execute(nodes)
+        expected_roi = calculate_roi_env(500.0, 300.0, 3.0, 5000.0, 1000.0)
+        assert results[0]["roi_env"] == pytest.approx(expected_roi)
+
     def test_eternius_lock_triggers_oush(self):
         src = "lock15000 audit_node\n"
         nodes = self.parser.parse_source(src, ".4d")
@@ -180,9 +326,17 @@ class TestLiliethParser:
 
     def test_parse_protocol_files(self):
         base = os.path.join(os.path.dirname(__file__), "..", "protocols")
-        for fname in ("init_mesh.v", "stretford_audit.4d", "lilieth_core.ai"):
+        for fname in ("init_mesh.v", "stretford_audit.4d", "lilieth_core.ai", "phlogiston.kg"):
             nodes = self.parser.parse_file(os.path.join(base, fname))
             assert len(nodes) > 0
+
+    def test_parse_and_execute_phlogiston_protocol(self):
+        base = os.path.join(os.path.dirname(__file__), "..", "protocols")
+        nodes = self.parser.parse_file(os.path.join(base, "phlogiston.kg"))
+        results = self.parser.execute(nodes)
+        statuses = [r["kong_status"] for r in results]
+        assert any("plasma_dissociation" in s for s in statuses)
+        assert any("carbon_sequestration" in s for s in statuses)
 
     def test_vajra_take_hook_fires_kong_listener(self, capsys):
         """Verify the cross-module hook: Vajra 'take' triggers KONG harvester."""

@@ -1,0 +1,17 @@
+# phlogiston.kg — Vulcan Kiln Plasma Gasification Protocol
+# Syntax: <action><scale> [args]
+# Section IV: The Phlogiston Protocol — Thermal Induction & Environmental ROI
+# Pillar 4: Nourishment. Fire is the Great Purifier (Gibil).
+#
+# Phase 1: Plasma Intake — Molecular Dissociation of Static MSW
+dissociate47000 static_msw_input
+# Phase 2: Thermal Differential — Sovereign Heat via Steam-less Turbines
+induce55000 sovereign_heat_exchanger
+# Phase 3: Radiant Loop — District Heating via Oceanic Copper Jackets
+distribute12000 careworkx_district_heat
+# Phase 4: Bio-Active Ash Dispersal via PlumbWorX Irrigation
+disperse10000 e_ash_100_trees
+# Phase 5: Carbon Sequestration — Stretford Meadows Regeneration
+sequester20046 stretford_meadows
+# Phase 6: OUSH Finality — Seal the Phlogiston Ledger
+lock20460 phlogiston_node

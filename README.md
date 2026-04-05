@@ -11,7 +11,7 @@ root lock.
 
 ```
 /core
-  algorithms.py      # S.U.E. Validator · Indra-Vajra Harvester · OUSH Handshake
+  algorithms.py      # S.U.E. Validator · Indra-Vajra Harvester · OUSH Handshake · Φ_fire · ROI_env
   interpreter.py     # Extensible LiliethParser for .v / .kg / .4d / .ai files
   compiler.py        # Compiles AST nodes → sealed Bytecode via OUSH finality
 
@@ -22,12 +22,13 @@ root lock.
   init_mesh.v        # Vajra — Quad-Vector mesh initialisation
   stretford_audit.4d # Eternius — A56 kinetic-slab spatial audit
   lilieth_core.ai    # Animus — 14+1 Sovereign Pillars governance
+  phlogiston.kg      # KONG — Vulcan Kiln plasma gasification (Section IV)
 
 /data
   memory_map.json    # Saline Lattice — runtime state of the Sovereign Mesh
 
 /tests
-  test_lilieth.py    # 34 pytest tests covering all modules
+  test_lilieth.py    # 51 pytest tests covering all modules
 ```
 
 ---
@@ -87,6 +88,42 @@ oush_handshake("NODE_42", "ARCHITECT_ALPHA")
 ```
 
 Every compiled bytecode block is sealed with an OUSH handshake before dispatch.
+
+### 4 · Φ_fire (Phlogiston Thermal Induction)
+
+```python
+from core.algorithms import calculate_phi_fire
+
+phi = calculate_phi_fire(
+    m_waste=47000.0,   # kg input from 47,000 residents
+    delta_tox=0.01,    # toxicity coefficient (approaches 0 for plasma)
+    q_plasma=5.0,      # MJ/kg plasma heat flux
+    delta_t=4800.0,    # K thermal differential (Vulcan Kiln → Sovereign Spine)
+    e_ash_sum=2350.0,  # kg mineral equity of Bio-Active Ash (E_ash)
+)
+# Φ_fire = (M_waste × δ_tox) / ((Q_plasma × ΔT) + Σ_E_ash)
+```
+
+Higher Φ_fire indicates greater toxic-mass conversion per unit of thermal-mineral output.
+Triggered automatically by `dissociate` commands in `.kg` protocol files.
+
+### 5 · ROI_env (Environmental Return on Investment)
+
+```python
+from core.algorithms import calculate_roi_env
+
+roi = calculate_roi_env(
+    carbon_seq=1200.0,      # tonnes C locked in 100 Ash Trees + vitrified slag
+    soil_vit=850.0,         # soil vitality index from E_ash application
+    growth_multiplier=5.0,  # Λ — Sovereign Forest accelerated biological rate
+    landfill_vol=94000.0,   # m³ static waste removed from Stretford Meadows
+    emission_stat=3100.0,   # tCO₂e baseline displaced by Vulcan Kiln
+)
+# ROI_env = ((Carbon_seq + Soil_vit) × Λ) / (Landfill_vol + Emission_stat)
+# roi > 1.0 → net environmental gain (regeneration outweighs historical damage)
+```
+
+Triggered automatically by `sequester` commands in `.kg` protocol files.
 
 ---
 

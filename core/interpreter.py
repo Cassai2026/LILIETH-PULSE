@@ -38,7 +38,13 @@ import re
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
-from core.algorithms import calculate_sue_score, harvest_kinetic_energy, oush_handshake
+from core.algorithms import (
+    calculate_phi_fire,
+    calculate_roi_env,
+    calculate_sue_score,
+    harvest_kinetic_energy,
+    oush_handshake,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -167,6 +173,11 @@ class KongInterpreter(BaseInterpreter):
 
     Automatically triggers the Indra-Vajra kinetic harvester whenever a
     ``take`` command is parsed from a `.v` source file (injected via hook).
+
+    Section IV — Phlogiston Protocol commands:
+
+    * ``dissociate`` — plasma gasification; triggers :func:`~core.algorithms.calculate_phi_fire`
+    * ``sequester``  — carbon sequestration; triggers :func:`~core.algorithms.calculate_roi_env`
     """
 
     extension = ".kg"
@@ -176,11 +187,61 @@ class KongInterpreter(BaseInterpreter):
         # Default kinetic-harvester parameters; callers may override.
         self._traffic_density: float = 1.0
         self._velocity_avg: float = 1.0
+        # Default Φ_fire parameters (Phlogiston Thermal Induction).
+        self._phi_fire_params: Dict[str, float] = {
+            "m_waste": 47000.0,   # kg — input from 47,000 residents
+            "delta_tox": 0.01,    # near-zero toxicity coefficient for plasma
+            "q_plasma": 5.0,      # MJ/kg plasma heat flux
+            "delta_t": 4800.0,    # K thermal differential (5000°C kiln core)
+            "e_ash_sum": 2350.0,  # kg mineral equity of Bio-Active Ash
+        }
+        # Default ROI_env parameters (Environmental ROI).
+        self._roi_env_params: Dict[str, float] = {
+            "carbon_seq": 1200.0,      # tonnes — 100 Ash Trees + vitrified slag
+            "soil_vit": 850.0,         # soil vitality index from E_ash
+            "growth_multiplier": 5.0,  # Λ — Sovereign Forest accelerated rate
+            "landfill_vol": 94000.0,   # m³ static waste removed
+            "emission_stat": 3100.0,   # tCO₂e baseline displaced
+        }
 
     def set_kinetic_params(self, traffic_density: float, velocity_avg: float) -> None:
         """Configure the kinetic harvester parameters used on 'take' commands."""
         self._traffic_density = traffic_density
         self._velocity_avg = velocity_avg
+
+    def set_phi_fire_params(
+        self,
+        m_waste: float,
+        delta_tox: float,
+        q_plasma: float,
+        delta_t: float,
+        e_ash_sum: float,
+    ) -> None:
+        """Configure the Φ_fire plasma gasification parameters for 'dissociate' commands."""
+        self._phi_fire_params = {
+            "m_waste": m_waste,
+            "delta_tox": delta_tox,
+            "q_plasma": q_plasma,
+            "delta_t": delta_t,
+            "e_ash_sum": e_ash_sum,
+        }
+
+    def set_roi_env_params(
+        self,
+        carbon_seq: float,
+        soil_vit: float,
+        growth_multiplier: float,
+        landfill_vol: float,
+        emission_stat: float,
+    ) -> None:
+        """Configure the ROI_env parameters for 'sequester' commands."""
+        self._roi_env_params = {
+            "carbon_seq": carbon_seq,
+            "soil_vit": soil_vit,
+            "growth_multiplier": growth_multiplier,
+            "landfill_vol": landfill_vol,
+            "emission_stat": emission_stat,
+        }
 
     def execute_node(self, node: ASTNode) -> Dict[str, Any]:
         result = node.to_dict()
@@ -188,6 +249,14 @@ class KongInterpreter(BaseInterpreter):
             joules = harvest_kinetic_energy(self._traffic_density, self._velocity_avg)
             result["sovereign_joules"] = joules
             result["kong_status"] = f"kinetic_harvest:{joules:.4f}J"
+        elif node.action == "dissociate":
+            phi = calculate_phi_fire(**self._phi_fire_params)
+            result["phi_fire"] = phi
+            result["kong_status"] = f"plasma_dissociation:phi_fire={phi:.6f}"
+        elif node.action == "sequester":
+            roi = calculate_roi_env(**self._roi_env_params)
+            result["roi_env"] = roi
+            result["kong_status"] = f"carbon_sequestration:roi_env={roi:.6f}"
         else:
             result["kong_status"] = f"material_integrity:{node.action}@{node.scale}"
         return result
