@@ -1,0 +1,12 @@
+# stretford_audit.4d — Eternius Spatial/Temporal Blueprint
+# Syntax: <action><scale> [args]
+# Pillar: Spatial Justice / A56 Kinetic Slab Audit
+#
+# Temporal checkpoint: audit the A56 kinetic-slab grid
+scan4000 A56_kinetic_slab_grid
+map3000 piezo_node_positions
+measure2000 tectonic_pulse_hz
+# Record sovereignty timestamp
+stamp56150 stretford_grid_v1
+# Seal the ledger block with OUSH finality
+lock15000 stretford_audit_node
