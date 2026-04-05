@@ -31,7 +31,7 @@ class InductionNode(pygame.sprite.Sprite):
 class TidalBore(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.width = random.randint(250, 550)
+        self.width = random.randint(int(0.3 * WIDTH), int(0.5 * WIDTH))
         self.image = pygame.Surface((self.width, 25))
         self.image.fill(WHITE)
         self.rect = self.image.get_rect(
@@ -45,6 +45,39 @@ class TidalBore(pygame.sprite.Sprite):
             self.kill()
 
 
+def draw_sovereign_hud(screen, font_hud, pilot, kinetic_equity, progress):
+    """Render the three mandatory sovereign metrics onto the screen."""
+    # KINETIC EQUITY — gold, tracks toward £117,700,000.00
+    screen.blit(
+        font_hud.render(
+            f"KINETIC EQUITY: \xa3{kinetic_equity:,.2f} / \xa3117,700,000.00",
+            True,
+            GOLD,
+        ),
+        (20, 20),
+    )
+
+    # CONDUCTIVITY (mu_cu) — cyan label + cyan progress bar
+    screen.blit(
+        font_hud.render(f"CONDUCTIVITY (mu_cu): {pilot.mu_cu}%", True, CYAN),
+        (20, 55),
+    )
+    pygame.draw.rect(screen, (40, 40, 40), (20, 85, 200, 15))
+    pygame.draw.rect(screen, CYAN, (20, 85, int(pilot.mu_cu * 2), 15))
+
+    # 29TH NODE PROGRESS — green bar at bottom center
+    screen.blit(
+        font_hud.render("29TH NODE PROGRESS", True, VITALITY_GREEN),
+        (WIDTH // 2 - 90, HEIGHT - 75),
+    )
+    pygame.draw.rect(screen, (40, 40, 40), (WIDTH // 2 - 200, HEIGHT - 50, 400, 25))
+    pygame.draw.rect(
+        screen,
+        VITALITY_GREEN,
+        (WIDTH // 2 - 200, HEIGHT - 50, int((progress / 100) * 400), 25),
+    )
+
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -55,8 +88,9 @@ def main():
     pilot = InductionNode()
     all_sprites = pygame.sprite.Group(pilot)
     bores = pygame.sprite.Group()
-    equity = 0.0
+    kinetic_equity = 0.0
     progress = 0.0
+    flash = False
     running = True
 
     while running:
@@ -73,33 +107,19 @@ def main():
 
         all_sprites.update()
 
+        flash = False
         if pygame.sprite.spritecollide(pilot, bores, True):
-            equity += 1850 * (pilot.mu_cu / 100)
+            kinetic_equity += 1850 * (pilot.mu_cu / 100)
             progress += 0.5
+            flash = True
+
+        draw_sovereign_hud(screen, font_hud, pilot, kinetic_equity, progress)
+        all_sprites.draw(screen)
+
+        # Cyan border flash renders on top as an overlay
+        if flash:
             pygame.draw.rect(screen, CYAN, (0, 0, WIDTH, HEIGHT), 6)
 
-        screen.blit(
-            font_hud.render(f"KINETIC EQUITY: \xa3{equity:,.2f} / \xa3117.7M", True, GOLD),
-            (20, 20),
-        )
-        screen.blit(
-            font_hud.render(f"CONDUCTIVITY (mu_cu): {pilot.mu_cu}%", True, CYAN),
-            (20, 55),
-        )
-
-        # Conductivity bar
-        pygame.draw.rect(screen, (40, 40, 40), (20, 85, 200, 15))
-        pygame.draw.rect(screen, CYAN, (20, 85, int(pilot.mu_cu * 2), 15))
-
-        # Progress bar
-        pygame.draw.rect(screen, (40, 40, 40), (WIDTH // 2 - 200, HEIGHT - 50, 400, 25))
-        pygame.draw.rect(
-            screen,
-            VITALITY_GREEN,
-            (WIDTH // 2 - 200, HEIGHT - 50, int((progress / 100) * 400), 25),
-        )
-
-        all_sprites.draw(screen)
         pygame.display.flip()
         clock.tick(FPS)
 
