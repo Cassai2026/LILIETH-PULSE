@@ -27,7 +27,7 @@ root lock.
   memory_map.json    # Saline Lattice — runtime state of the Sovereign Mesh
 
 /tests
-  test_lilieth.py    # 32 pytest tests covering all modules
+  test_lilieth.py    # 34 pytest tests covering all modules
 ```
 
 ---

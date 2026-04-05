@@ -147,6 +147,7 @@ class TestLiliethParser:
         nodes = parser.parse_source("give10001 resource\n", ".ai")
         results = parser.execute(nodes)
         assert results[0]["animus_status"] == "GIVE_BLOCKED"
+        assert results[0]["sue_score"] <= 1.0
 
     def test_kong_take_triggers_kinetic_harvest(self):
         src = "take100 A56\n"
@@ -161,8 +162,8 @@ class TestLiliethParser:
         assert results[0]["oush_locked"] is True
 
     def test_unknown_extension_raises(self):
+        nodes = self.parser.parse_source("ignite100\n", ".xyz")
         with pytest.raises(ParseError):
-            nodes = self.parser.parse_source("ignite100\n", ".xyz")
             self.parser.execute(nodes, ".xyz")
 
     def test_register_custom_interpreter(self):
