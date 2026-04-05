@@ -120,6 +120,37 @@ with RootSession("ARCHITECT_ALPHA", "LILIETH_BIO_ROOT_v1", node_id="admin") as s
 
 ---
 
+## ENKI FLOW: The 29th Node (Real-World Sim Game)
+
+A real-world simulation game built on the Sovereign OS engine.
+
+```
+/games
+  enki_flow.py   # ENKI FLOW — pilot a Drone to harvest Kinetic Energy pulses
+```
+
+**Controls**
+
+| Key        | Action            |
+|------------|-------------------|
+| `↑` Up     | Move Drone up     |
+| `↓` Down   | Move Drone down   |
+| Close window | Exit           |
+
+**HUD**
+
+- **KINETIC HARVEST** — number of golden energy pulses collected.
+- **BASE FREQUENCY** — the God-Mind base frequency (10^47).
+
+**Run the game**
+
+```bash
+pip install pygame
+python games/enki_flow.py
+```
+
+---
+
 ## Running Tests
 
 ```bash
